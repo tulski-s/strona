@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<div class="container-fluid">
+
+	<div id="sidebar" role="navigation">
+	    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+
+
+	    <div id="sidebar-nav">
+	      <ul class="nav nav-stacked"> 
+	        <li><a href="#about"> <span class="glyphicon glyphicon-user"></span>  About me</a></li>
+	        <li><a href="#career"> <span class="glyphicon glyphicon-briefcase"></span>  Career</a></li>
+	        <li><a href="#education"> <span class="glyphicon glyphicon-education"></span>  Education</a></li>
+	        <li><a href="#publications"> <span class="glyphicon glyphicon-book"></span>  Publications</a></li>
+	        <li><a href="#workshops"> <span class="glyphicon glyphicon-wrench"></span>  Workshops</a></li>
+	        <li><a href="#skills"> <span class="glyphicon glyphicon-scissors"></span>  Skills</a></li>
+	        <li><a href="#contact"> <span class="glyphicon glyphicon-earphone"></span>  Contact</a></li>
+	      </ul>
+	    </div>
+  	</div> <!-- end of siedbar -->
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<div id="about"></div>
+			<h1 class="my_head" id="first"><span>About me</span></h1>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/DSC_3802.jpg" class="img-responsive img-rounded center-block" alt="Slawomir_img" id="myimg">
+		</div>
+		<div class="col-md-8">
+			<p class="my_para">I am a hardworking, passionate and imaginative Python programmer. I have an ability to work hard and smart, handle responsibilities and accomplish my assignments on time.</p>
+			<p class="my_para">My recent commercial coding experience comes from my position as a Python Data Programmer at London start-up Import.io. My main responsibilities were building python and java-script web-scrapers and contributing to python extraction framework. I also built two UIs: one was python’s flask based web-application for managing team internal work. Second one was visual tool for building advanced configuration files for extraction framework mentioned earlier. </p>
+			<p class="my_para">My other experience comes  from my previous positions as a GIS Programmer and Python Teacher. I also use a lot of python while working scientifically, mainly with satellite data from NASA.</p>
+			<p class="my_para">There is never a good time to stop learn, so I spend my free time reading technical books and following tutorials. When there is a chance, I like to attend workshops and meetups.</p>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<div id="career"></div>
+			<h1 class="my_head"><span>Career history</span></h1>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/importio.png" class="img-responsive img-rounded center-block" alt="import.io_logo" id="myimg">
+			<p class="podpis">SEP 2015 - FEB 2016</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Import.IO</h3>
+			<h4>Python Data Programmer</h4>
+			<p class="my_para">At the beginning of my work my main tasks were building python and java-script web-scrapers and screening/formatting gathered data.
+			To accomplish my goals I have used my problem-solving skills and creativity. Often I had to look for different work around to get data I wanted. Along
+			with python and js I used vastly: regular expressions and Xpaths.
+			<p class="my_para">Soon I have got a new responsibilities, ie. contributing to python data extraction framework. I have written functions (and 
+			unit-tests for them) to make data extraction and cleaning simpler and more automated. </p>
+			<p class="my_para">During my work I also built 2 UIs. First one was web-application (written in python’s flask) for managing team internal work. The 
+			second one was visual tool for creating advanced configuration files for earlier-mentioned extraction framework. For later, I used node-red, which is 
+			node-js flow-based programming tool. The idea of the 2nd UI appeared after I won (together with my coworker) one of company’s hackathon. We presented 
+			there prototype of tool written in python and it’s tkinter library. After that success, the project landed on the official product road-map.</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/grange.jpg" class="img-responsive img-rounded center-block" alt="grange_logo" id="myimg">-
+			<p class="podpis">JUL 2015 - JUL 2015</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Grange Fencing</h3>
+			<h4>Data analyst</h4>
+			<p class="my_para"> Strategical analysis of optimal localization of company’s warehouses in the territory of United Kingdom. I was responsible for 
+			transforming company's abstract calculation algorithm into computer application. I have used Python with pyshp and tkinter libraries. I have also 
+			created visual presentation of outcomes on digital maps (for this purpose I used open source GIS software – QGIS).</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/polibuda.png" class="img-responsive img-rounded center-block" alt="Pwr_logo" id="myimg">
+			<p class="podpis">MAY 2015 - JUN 2015</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Wroclaw University of Technology</h3>
+			<h4>Python Teacher/Lecturer</h4>
+			<p class="my_para">I was running classes and preparing materials for didactic purposes for future GIS specialists. Topics I have covered during my 
+			classes included Python language syntax, data types, creating custom functions, conditional statements, loops, writing more complex scripts, basics of 
+			OOP and ArcPy library. My goal was to give students a solid foundation for programming in Python and using ArcPy library for spatial analysis.</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/wizipisi.jpeg" class="img-responsive img-rounded center-block" alt="wizipisi_logo" id="myimg">
+			<p class="podpis">JAN 2015 - JUN 2015</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Wroclaw Institute of Spatial Information and Artificial Intelligence</h3>
+			<h4>GIS Programmer</h4>
+			<p class="my_para">I was hired to develop algorithm for automate building detection from high resolution aerial images. It was a part of bigger 
+			application designed to improve property tax collecting system. Project was innovative because it utilizes the type of images usually not used for 
+			this purpose. To create appropriate solution I had to combine knowledge from remote sensing and image processing along with my own ideas. At the end, 
+			validation tests showed that my algorithm's detection rate was about 98%.</p>
+			<p class="my_para">During my work I also wrote couple of python scripts to automate coworkers task and took part in other projects, eg. updating 
+			cities and addresses database or updating National Topographic Database. My role consisted mainly from data entering, but required also writing SQL 
+			queries and data munging.</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/fgi.jpg" class="img-responsive img-rounded center-block" alt="fgi_logo" id="myimg">
+			<p class="podpis">SEP 2015 - NOV 2015</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Finnish Geodetic Institute</h3>
+			<h4>Intern</h4>
+			<p class="my_para">This internship was the result of my scientific research efforts that I made during my master’s studies. I was responsible for 
+			terrestrial and mobile laser scanning field measurements and post-processing gathered data in specialized photometric software.</p>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<p id="education"></p>
+			<h1 class="my_head"><span>Education</span></h1>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/igig.JPG" class="img-responsive img-rounded center-block" alt="IGiG_logos" style="margin-bottom:0;">
+			<p class="podpis">JUL 2014</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Wroclaw University of Environmental and Life Science</h3>
+			<h4>Master's degree in the field of Geoinformatics</h4>
+			<p class="my_para">Course included modules on rational databases, SQL queries, programming with VBA (digital image processing, eg. transformations, filters and pixel-based calculations) and GIS programming. 
+			<p class="my_para">I started my scientific projects on the use of ICESat satellite data to measure global tree heights and improving accuracy of SRTM digital elevation model (which is used inter alia by Google Earth)</p>
+			<p class="my_para">I have gained the best possible score for my Master's thesis. I investigated there possibility of improving polish spatial database system with ICESat data.</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/up.png" class="img-responsive img-rounded center-block" alt="UP_logo" style="margin-bottom:10px;">
+			<p class="podpis">FEB 2013</p>
+		</div>
+		<div class="col-md-8" >
+			<h3>Wroclaw University of Environmental and Life Science</h3>
+			<h4>Bachelor's degree in the field of Geodesy and Cartography</h4>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<p id="publications" style="padding-top: 15px;"><!-- Empty paragraph for publication id --></p>
+			<h1 class="my_head"><span>Publications</span></h1>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/geodeta.jpg" class="img-responsive img-rounded center-block" alt="goedeta_okladka">
+		</div>
+		<div class="col-md-8">
+			<h4>Tulski S., Lidar in space (in Polish), Geodeta 2014, no. 5, pp. 15-17</h4>
+			<a href="http://geoforum.pl/?menu=47064&page=edition2&id=1233&id_article=1537&link=slawomir-tulski-lidar-w-kosmosie-choc-technologia-skanowania-laserowego-zdobywa-coraz-wieksza">Preview</a>
+			<p class="my_para"> ICESat was the satellite mission, whose primary goal was to monitor polar regions. The satellite was also gathering information about height and vertical structure of clouds and land topography. Main objective of this publication was to asses if data acquired by ICESat are useful for polish spatial data system. To accomplish this goal, horizontal and vertical accuracy of ICESat measurements were checked. It was also analyzed if this data can be used for estimating canopy height. </p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/esa_poster.jpg" class="img-responsive img-rounded center-block" alt="poster_sample">
+		</div>
+		<div class="col-md-8">
+			<h4>Tulski S., Improvement of Accuracy of the SRTM C-Band Digital Elevation Model Using the ICESat Ground Control Points.</h4> 
+			<h4>Poster presented at: ESA EO Summer School 2014, 4-14/08, Frascati, Italy</h4>
+			<p class="my_para">Digital elevation model (DEM), i.e. digital representation of the surface of the Earth, is important data source for most of the Earth sciences. Near-global DEMs like the SRTM C-Band enable to understand the Earth as a complex system. Despite of its numerous applications, the SRTM C-Band tends to overestimate elevations over areas where vegetation is present. A novel approach utilizing ICESat ground control points was developed to remove this positive elevation bias.</p>
+		</div>
+	</div>
+
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<p id="workshops" style="padding-top: 15px;"><!-- Empty paragraph for workshops id --></p>
+			<h1 class="my_head"><span>Workshops &amp; coursess</span></h1>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/whiteoctober.png" class="img-responsive img-rounded center-block" alt="white_october_logo">
+			<p class="podpis">JAN 2016</p>
+		</div>
+		<div class="col-md-8">
+			<h3>White October Events</h3>
+			<h4><b>Advanced Javascript Workshop</b></h4>
+			<p class="my_para">The class gave me strong core understanding of the JS language and its execution model. It was driven by exercises and delivered me knowledge required to make effective use of JS on the back- or front-end. Some of inculed topics: scope, closures, functions, data structures, Combining OOP and functional programming.</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/linux.jpg" class="img-responsive img-rounded center-block" alt="linux_foundation_logo">
+			<p class="podpis">APR 2015</p>
+		</div>
+		<div class="col-md-8">
+			<h3>Linux Foundation</h3>
+			<h4><b>Introduction to Linux</b></h4>
+			<p class="my_para">Course contained working knowledge of Linux, navigation through major Linux distributions, system configuration and basic shell scripting.</p>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-2">
+			<img src="static/images/esa.png" class="img-responsive img-rounded center-block" alt="esa_logo">
+			<p class="podpis">AUG 2014</p>
+		</div>
+		<div class="col-md-8">
+			<h3>European Space Center, Frascati (Rome), Italy</h3>
+			<h4><b>Earth Observing Summer School</b></h4>
+			<p class="my_para">I was accepted as one of the youngest participants, because of my scientific achievements. Workshops included lectures and practical exercises about vastly understood Earth observing systems and basics of data assimilation and machine learning.</p>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<div id="skills" style="padding-top: 15px"></div>
+			<h1 class="my_head"><span>Skills</span></h1>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-6 col-xs-6">
+			<ul class="no-bullets">
+				<li>
+					<span class="ability-title">Python
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">Web Scraping
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">XPaths, XML, JSON
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">JavaScript
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">GNU/LINUX
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">HTML5
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+			</ul>
+		</div>
+
+		<div class="col-md-5 col-xs-6">
+			<ul class="no-bullets">
+				<li>
+					<span class="ability-title">Regular expressions 
+						<span class="ability-score"> 
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">Flask, Django
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">Command line
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">CSS3
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">MySQL
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+				<li>
+					<span class="ability-title">Visual Basics
+						<span class="ability-score">
+							<span class="glyphicon filled glyphicon-ok-sign " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+							<span class="glyphicon empty glyphicon-ok-circle " aria-hidden="true"></span>
+						</span>
+					</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-1 col-xs-0"></div>
+		<div class="col-md-10 col-xs-12">
+			<p id="contact" style="padding-top: 15px;"><!-- Empty paragraph for contact id --></p>
+			<h1 class="my_head"><span>Contact</span></h1>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-xs-1"></div>
+		<div class="col-xs-3">
+			<a href="https://github.com/tulski-s">
+				<img src="static/images/github.png" style="height: 70px; width: 180px;" class="img-responsive img-rounded center-block" alt="Github">
+			</a>
+		</div>
+		<div class="col-xs-3">
+			<a href="mailto:slawomir.tulski@gmail.com">
+				<img src="static/images/gmail.png" style="height: 70px; width: 200px;" class="img-responsive img-rounded center-block" alt="Gmail">
+			</a>
+		</div>
+		<div class="col-xs-3">
+			<a href="#">
+				<img src="static/images/linked.png" style="height: 70px; width: 160px;" class="img-responsive img-rounded center-block" alt="LinkedIn">
+			</a>
+		</div>
+	</div>
+
+	<div class="row post">
+		<div class="col-sm-4 col-xs-0"></div>
+		<div class="col-sm-2 col-xs-6">
+			<a type="button" class="btn btn-primary pull-right" href="static/docs/Slawomir_Tulski_CV.pdf" download>Download .pdf</a>
+		</div>
+	
+		<div class="col-sm-2 col-xs-6">
+			<a type="button" class="btn btn-primary pull-left" href="static/docs/Slawomir_Tulski_CV.doc" download> Download .doc </a>
+		</div>
+		<div class="col-sm-4 col-xs-0"></div>
+	</div>
+
+	<script type="text/javascript" src="static/js/myjs.js"></script>
+	
+</div>
+{% endblock body_block %}
