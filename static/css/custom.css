@@ -1,0 +1,199 @@
+#no_margin {
+	margin-left: 0;
+	margin-right: 0;
+	padding-left: 0;
+	border-width: 0;
+}
+
+.jumbotron {
+	height: 40vh;
+	width: 100%;
+	background-image: url("../images/tlo_.jpg");
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: cover;
+	margin-top:0;
+}
+
+.navbar {
+	padding-bottom: 0;
+	margin-bottom:0;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.menu {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.jumbotron .container { 
+	position: relative; 
+	top: 28%; z-index: 4; 
+	text-align: center; 
+}
+
+
+.jumbotron .container > * { 
+	text-align: center; 
+	color: #838486;
+}
+
+
+.jumbotron .container .lead { 
+	font-size: 28px; 
+}
+
+a {
+	color: #33A1D3;
+}
+
+blockquote {
+	border: 0;
+	font-family: Georgia, serif;
+	font-size: 30px;
+	font-style: italic;
+	margin: 0.25em 0;
+	padding: 0.25em 40px;
+	position: relative;
+}
+
+blockquote cite {
+	color: #999999;
+	font-size: 20px;
+	display: block;
+	margin-top: 5px;
+	padding-bottom: 20px;
+}
+ 
+blockquote cite:before {
+	content: "\2014 \2009";
+}
+
+article {
+	font-family: Georgia, "Times New Roman", Times, serif;
+    font-size:20px;
+	margin-top: 5px; margin-bottom: 0px;
+	padding-right: 30px;
+	padding-bottom: 20px;
+    font-weight: normal;
+    color: #222;
+    text-align: justify;
+}
+
+.my_para {
+	font-family: Georgia, "Times New Roman", Times, serif;
+    font-size:18px;
+	margin-top: 5px; margin-bottom: 0px;
+	padding-right: 30px;
+	padding-bottom: 20px;
+    font-weight: normal;
+    color: #222;
+    text-align: justify;
+}
+
+.my_head {
+	font-family: Georgia, "Times New Roman", Times, serif;
+    font-size:24px;
+    font-weight: normal;
+    color: #222;
+    border-bottom: 1px solid #000;
+    width: 100%; 
+    text-align: center; 
+    line-height: 0.1em;
+    margin-top: 50px;
+    margin-bottom: 30px; 
+}
+
+.podpis {
+	font-family: Georgia, "Times New Roman", Times, serif;
+    font-size:18px;
+    text-align: center;
+}
+
+.post {
+	margin-bottom: 50px;
+}
+
+.my_head span { 
+    background:#fff; 
+    padding:0 10px; 
+}
+
+#first {
+	margin-top: 80px;
+}
+
+
+#myimg {
+	padding-bottom: 30px;
+}
+
+#footer {
+	margin: 10px 0;
+	border-top: 1px soild #31948a;
+	font-size: 80%%;
+	text-align: center;
+}
+
+
+ul.no-bullets { 
+	list-style-type: none; 
+	margin: 0px; 
+}
+
+
+ul > li .ability-title { 
+	display: inline-block; 
+	width: 60%; 
+	font-family: Georgia, "Times New Roman", Times, serif;
+    font-size:20px;
+}
+
+ul > li .ability-score { 
+	float: right;
+	padding: 0px; 
+}
+ul > li .ability-score .filled { color: #33A1D3 ;}
+ul > li .ability-score .empty {color: #DFE0E0; } 
+
+
+/*tutaj do navbar po lewej w CV*/
+
+#sidebar {
+    height: 100%;
+    padding-top: 0px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 50px;
+    z-index: 2;
+}
+#sidebar .link-text {
+    visibility: hidden;
+}
+#sidebar:hover .link-text {
+    visibility: visible;
+}
+#sidebar:hover {
+    width: 150px;
+    background-color: white;
+}
+#sidebar a {
+    color: #33A1D3;
+    white-space: nowrap;
+    overflow: hidden;
+}
+#sidebar-nav {
+    text-align: left;
+    font-size: 16px;
+    margin-top: 75px;
+}
+
+#sidebar span {
+	font-size: 32px;
+}
