@@ -19,3 +19,7 @@ def CV():
 @app.route('/proxy_harvester')
 def post_proxy_harvester():
     return render_template('proxy_harvester.html')
+
+@app.route('/creepy_scraper')
+def post_creepy_scraper():
+    return render_template('creepy_scraper.html')

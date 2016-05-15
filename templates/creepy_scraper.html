@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<div class="container-fluid">
+
+	<div class="row">
+		<div class="col-xs-10 col-xs-offset-1">
+
+		<h1 class="my_head"  id="first"> <span>Creepy Scraper, 14.05.2016</span></h1>
+		<article>
+
+		<h3 style="text-align: center; margin-top: 60px;" ><b>Where does it start ?</b></h3>
+		<p>Nowadays, it’s not a problem to find personal information about someone. And I’m not talking about famous people. Everyone dumps tons of data about themselves into various social media. It’s part of our lifestyle now and I am not visionary here. Is it good or bad? It’s not topic for this post. But it lies close to it. There are two short stories which inspired me to create little site project called ‘Creepy Scraper’. I’ve shown it on one of the hack-day in my workplace. </p>
+		<p>First story is about my friend who liked a girl. He had just one tiny problem. He saw her once when she was entering one of the student dorm and after that she disappeared. Was it hard to find her (he didn’t even know her name)? Not at all. He knew the dorm name. After quick Facebook search he found open group for her dorm tenants. She was there. He started to dig deeper. At the end of his research he knew more than enough. Besides the ALL personal information he even knew things like to which kindergarten she was attended to (16 years ago!) and how she looked back then.</p>
+		<p>Second story is about the husband, who gave full name of his wife to an expert. Wife knew about that. They just wanted to check how much info about her the expert would be able to gather. Results? After hour of research expert had all personal information, list of all countries she ever visited, family history and much more. After reading report, husband admitted that he found out things about his wife, that even he was not aware of.</p>
+		<p>Those two stories made me think. Can I create a robot, which would do my friend’s and expert’s work? Automate scraper, who takes as an input full name, goes to different social media, grabs all info and finally merge and matches information? That way you could get full overview of person with one click (person’s social life (Facebook), career history (LinkedIn), family history (Ancestry) and more). Not everything is present in one source, but you can find missing pieces somewhere else.</p>
+		<p>On my project I focused on two sources: Facebook (FB) and LinkedIn (LN). As a proof of concept I wanted to scrape those sites and be able to find matching profiles (is person from FB profile is the same person from LN profile?). In this and subsequent I’m will show you some piece of code I wrote and results got, along with my thoughts about this project.</p>
+
+		<h3 style="text-align: center; margin-top: 60px;" ><b>Technologies</b></h3>
+		<p>In project I used Python, Selenium and PhantomJS. I didn’t want to use any of existing APIs so I had to write scrapes from scratch. The reason for that is that I wanted emulate real person, I didn’t want to be limited only to existing API endpoints and sign any terms of agreement. For those who are not familiar with all technologies, <a href="http://www.seleniumhq.org/">Selenium</a> is browser automation tool and <a href="http://phantomjs.org/">PhantomJS</a> is faceless browser (there is no UI and it works in background). Those tools are often used for testing web applications, but can also be extremely powerful while scraping (it handles all JavaScript scripts, AJAX calls, sessions etc.).</p>
+		
+		<h3 style="text-align: center; margin-top: 60px;" ><b>Facebook (FB)</b></h3>
+		<p>First thing I had to do was to create FB account. Without active user, FB really quickly starts to ask captcha questions. There is no point in trying to solve them as a robot. It’s better just to avoid them. Annoying part of setting up user, was that I was forced to give FB my phone number during that process... (that’s just sick and it’s another reason to hate FB). </p>
+
+		<p>When my user was ready I could start scraping. Bot should enter FB, log in, do search and grab available details for search results. Login is simple:</p>
+		<pre>
+			<code>
+from selenium import webdriver
+import time
+import re
+class FBScraper():
+    
+    def __init__(self):
+        self.driver = webdriver.PhantomJS('/Applications/phantomjs-2.1.1-macosx/bin/phantomjs')
+
+    def login(self):
+        self.driver.get('https://facebook.com')
+
+        email_element = self.driver.find_element_by_name('email')
+        password_element = self.driver.find_element_by_name('pass')
+        email_element.send_keys('email-binded-to-acount')
+        password_element.send_keys('password')
+        login_element = self.driver.find_element_by_id('loginbutton')
+        login_element.click()
+			</code>
+		</pre>
+
+		<p>Next part is search. I had to pass search string (in my case it was full name, but you can also search using e.g. email) to <code> https://www.facebook.com/search/str/{search-string}/keywords_users </code>. FB uses infinite scroll for results. To grab more than just couple of results I had to handle that. I executed simple javascript: <code> "window.scrollTo(0, document.body.scrollHeight);" </code>. After that I could get links to resulting profiles using html tags. Method looked so (I used set container to store results):
+
+		<pre>
+			<code>    def get_profiles(self, query_string, set_container):
+        self.driver.get('https://www.facebook.com/search/str/{}/keywords_users'.format(quote(query_string, safe='')))
+        time.sleep(1)
+
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)
+        
+        results = self.driver.find_elements_by_class_name('_gll')
+        
+        for result in results:
+            profile = None
+            links = result.find_elements_by_tag_name('a')
+            for link in links:
+                href = link.get_attribute('href')
+                if href.endswith('br_rs'):
+                    href = href.replace('?ref=br_rs', '')
+                    href = href.replace('&ref=br_rs', '')
+                    profile = href + '/about'
+                
+            if profile and '?' in profile:
+                profile = profile.replace('/about', '&sk=about')
+
+            if not profile:
+                continue
+            set_container.add(profile)
+			</code>
+		</pre>
+
+		<p>After I got links, I could start getting data. Good place for it is person’s “about” page. I convert profile links the way they pointed to proper page and then again, used tags to get what I wanted. Here is example for some information:</p>
+
+		<pre>
+			<code>    def get_details(self, about_page):
+
+        self.driver.get(about_page)
+
+        imgs = self.driver.find_elements_by_tag_name('img')
+        for img in imgs:
+            if img.get_attribute('class') == 'profilePic img':
+                img = img.get_attribute('src')
+                break
+            img = ''
+        
+        name = self.driver.find_element_by_id('fb-timeline-cover-name').text
+        name = name.split('\n')[0]
+
+        details_element = self.driver.find_elements_by_class_name('clearfix')
+        details = [detail.text for detail in details_element]
+        details_text = '\n'.join(details)
+
+        city_match = re.findall(r'Lives in ([\w\s\-\',]*), ([\w\s\-\']+)', '!'.join(details_text.split('\n')))
+        if city_match:
+            current_city = city_match[0][0]
+            current_country = city_match[0][1]
+        else:
+            current_city = ''
+            current_country = ''
+			</code>
+		</pre>
+
+		<p>After that FBScraper class was basically ready to use. </p>
+
+		<h3 style="text-align: center; margin-top: 60px;" ><b>LinkedIn (LN)</b></h3>
+		<p>To avoid being caught as a robot, I had to create another fake account (this time there was no need for phone number). Interesting thing about searching people on LN is that it’s better to do query without being logged in. The reason for that is fact, that if you’re logged in you’ll get ‘similar’ profiles as firsts results. On the other hand, while searching as incognito – you will get most popular ones for given full name. Sample snippet for search and login:</p>
+
+		<pre>
+			<code>
+class LinkedInScraper():
+    
+    def __init__(self):
+        user_agent = useragents.random_useragent()
+        self.driver = webdriver.PhantomJS('/Applications/phantomjs-2.1.1-macosx/bin/phantomjs')
+
+    def login(self):
+        self.driver.get('https://www.linkedin.com/')
+
+        email_element = self.driver.find_element_by_id('login-email')
+        password_element = self.driver.find_element_by_id('login-password')
+        email_element.send_keys('ryszard.wydajny@onet.pl')
+        password_element.send_keys('Zaq12wsx')
+        login_element = self.driver.find_element_by_name('submit')
+        login_element.click()
+        
+        time.sleep(1)
+
+    def get_profiles(self, query_string):
+        parts = query_string.split(' ')
+        if len(parts) > 2:
+            search = quote(' '.join(parts[:-1]), safe='') + '/' + parts[-1]
+        else:
+            search = '/'.join(query_string.split(' '))
+
+        self.driver.get('https://www.linkedin.com/pub/dir/'+search)
+
+        profile_elements = self.driver.find_elements_by_class_name('profile-card')
+        profiles_links = []
+        for element in profile_elements:
+            link = element.find_element_by_tag_name('a').get_attribute('href')
+            profiles_links.append(link)
+        
+        return profiles_links
+			</code>
+		</pre>
+
+
+		<p>After search and login, I had profiles links and was able to start scraping data. Small sample of my scraping method:</p>
+
+		<pre>
+			<code>	def get_details(self, profile_page):
+        self.driver.get(profile_page)
+        name = self.driver.find_element_by_class_name('full-name').text
+
+        try:
+            img_element = self.driver.find_element_by_class_name('profile-picture').find_element_by_tag_name('img')
+            img = img_element.get_attribute('src')
+        except:
+            img = ''
+
+        job_element = self.driver.find_element_by_id('headline').find_element_by_class_name('title')
+        job = job_element.text
+			</code>
+		</pre>
+
+
+		<h3 style="text-align: center; margin-top: 60px;" ><b>Matching profiles</b></h3>
+		<p>Scraping part was just half of success. Another half was matching profiles and as it turned out, this part was harder. First I had to clean my results. There were too many profiles with just couple of details (e.g. just name). I created completeness measure (percentage of available profile details) and remove all results with score worse than 30%. After that I was able to compare each FB profile with each LN profile (Cartesian product).</p>
+		<p>As it was hack-a-thon project and time was limited I relied on string comparison (although in this case machine learning would for sure result in much better classification). Below is list with some of features I was compering:</p>
+		<ol>
+			<li><b>Name</b>
+				<p>I was checking Levenshtein distance between FB and LN names. This is simple metric, which tells how many single character edits (insertion, deletion and substitution) are required to change one word into another.</p>
+			</li>
+
+			<li><b>Location</b>
+				<p>From FB I had max of 3 features: ‘current_city’, ‘current_country’ and ‘from_city’.
+				From LinkedIn I had only one – ‘location’ and this feature could contain country, region, city or any mix of those. I was checking how many FB features are present in LN ‘location’. This method was not perfect at all and more advanced geolocation should be used. </p>
+			</li>
+
+			<li><b>Job</b>
+				<p>Same strategy as with name. Later I realized that FB job should be compared to any job from ‘career history’ on LN, because some people’s profiles are not up-to-date.</p>
+			</li>
+
+			<li><b>Schools and universities</b>
+				<p>I was checking if any of FB education is included in LN education history. This feature surprised me, because of LN language settings. At the beginning I was testing algorithms on my own full name and this features gave me perfect match. On my REAL FB, my past university name is written in English. Same way it has been seen from FAKE user perspective on my REAL LN account. Important fact is that at that point, my FAKE LN account was considered as ‘English’. It’s because only information about my fake user was that I live and work in London.</p>
+				<p>Later I added one Polish university to my FAKE LN education history. After that, language of my university on REAL LN profile has been seen from FAKE perspective as Polish. REAL FB still had English version and even though those were same universities, I had no match.</p>
+			</li>
+
+			<li><b>People related to person</b>
+				<p>This is another interesting example. At the beginning of tests, I didn’t take this feature into account. After a while, I realized that it’s quite common that people from FB (e.g. boyfriend/girlfriend, wife/husband, fiancé/fiancée) are listed in LN ‘People who seen this profile also watch…’ section.</p>
+			</li>
+		</ol>
+
+		<h3 style="text-align: center; margin-top: 60px;" ><b>Results</b></h3>
+		<p>Even with quite basic matching algorithms, my results were really good. I was able to match ~80% of profiles. False positives matches were at ~30% level. Not surprisingly, my algorithms had problems with those profiles which had minimum required completeness score. Stricter criteria should be taken into account in such cases in order to avoid false positives.</p>
+		<p>More useful features could be added to improve results and completeness score. E.g. ‘Interests’ form LN often can be found in FB ‘likes’. Also wider friends group from FB should be extracted.</p>
+
+		<h3 style="text-align: center; margin-top: 60px;" ><b>Final thoughts</b></h3>
+		<p>At that point I was shocked see how powerful this technique can be. With good algorithms (machine learning, face recognition etc.) and more sources (e.g. Instagram, Twitter, Ancestry) it’s possible to replace human expert and in minuets get all information about person (don’t forget, that input was only full name). What is more, because details from different social media are complement to each other, resulting profile would have almost full coverage of person’s life.</p>
+		<p>Less shocking (and more surprising) was fact that during project I realize my privacy settings on FB were crap. And they were not like that couple of years ago. Which means they changed over time. Most probably I even agreed to that in one of long ‘privacy’ letter from FB I got and agreed to (who even read those…).</p>
+		<p>My final though is that during project I focused only on process. There were some stories which inspired me and I wanted to check if I am able to automatically gather people details. Very important aspect which I didn’t even tackle is my project’s usage. And this can be really different. Some good ones (at least from company perspective): fraud detection, marketing (personalized advertising, classifying clients, better targeting) and HR (faster and better future candidates screening). And some bad ones: stalking, identity theft, stealing details for future personalized phising/smishing. But at that point I will leave you alone... (hopefully with at least some personal thoughts).</p>
+		
+		</article>
+
+		</div>
+	</div>
+</div>
+
+{% endblock body_block %}
