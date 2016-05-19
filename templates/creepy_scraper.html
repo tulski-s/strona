@@ -14,7 +14,7 @@
 		<p>Nowadays, it’s not a problem to find personal information about someone. And I’m not talking about famous people. Everyone dumps tons of data about themselves into various social media. It’s part of our lifestyle now and I am not visionary here. Is it good or bad? It’s not topic for this post. But it lies close to it. There are two short stories which inspired me to create little site project called ‘Creepy Scraper’. I’ve shown it on one of the hack-day in my workplace. </p>
 		<p>First story is about my friend who liked a girl. He had just one tiny problem. He saw her once when she was entering one of the student dorm and after that she disappeared. Was it hard to find her (he didn’t even know her name)? Not at all. He knew the dorm name. After quick Facebook search he found open group for her dorm tenants. She was there. He started to dig deeper. At the end of his research he knew more than enough. Besides the ALL personal information he even knew things like to which kindergarten she was attended to (16 years ago!) and how she looked back then.</p>
 		<p>Second story is about the husband, who gave full name of his wife to an expert. Wife knew about that. They just wanted to check how much info about her the expert would be able to gather. Results? After hour of research expert had all personal information, list of all countries she ever visited, family history and much more. After reading report, husband admitted that he found out things about his wife, that even he was not aware of.</p>
-		<p>Those two stories made me think. Can I create a robot, which would do my friend’s and expert’s work? Automate scraper, who takes as an input full name, goes to different social media, grabs all info and finally merge and matches information? That way you could get full overview of person with one click (person’s social life (Facebook), career history (LinkedIn), family history (Ancestry) and more). Not everything is present in one source, but you can find missing pieces somewhere else.</p>
+		<p>Those two stories made me think. Can I create a robot, which would do my friend’s and expert’s work? Automate scraper, which takes as an input full name, goes to different social media, grabs all info and finally merge and matches information? That way you could get full overview of person with one click (person’s social life (Facebook), career history (LinkedIn), family history (Ancestry) and more). Not everything is present in one source, but you can find missing pieces somewhere else.</p>
 		<p>On my project I focused on two sources: Facebook (FB) and LinkedIn (LN). As a proof of concept I wanted to scrape those sites and be able to find matching profiles (is person from FB profile is the same person from LN profile?). In this and subsequent I’m will show you some piece of code I wrote and results got, along with my thoughts about this project.</p>
 
 		<h3 style="text-align: center; margin-top: 60px;" ><b>Technologies</b></h3>
@@ -108,7 +108,7 @@ class FBScraper():
 			</code>
 		</pre>
 
-		<p>After that FBScraper class was basically ready to use. </p>
+		<p>After that, FBScraper class was basically ready to use. </p>
 
 		<h3 style="text-align: center; margin-top: 60px;" ><b>LinkedIn (LN)</b></h3>
 		<p>To avoid being caught as a robot, I had to create another fake account (this time there was no need for phone number). Interesting thing about searching people on LN is that it’s better to do query without being logged in. The reason for that is fact, that if you’re logged in you’ll get ‘similar’ profiles as firsts results. On the other hand, while searching as incognito – you will get most popular ones for given full name. Sample snippet for search and login:</p>
@@ -156,7 +156,7 @@ class LinkedInScraper():
 		<p>After search and login, I had profiles links and was able to start scraping data. Small sample of my scraping method:</p>
 
 		<pre>
-			<code>	def get_details(self, profile_page):
+			<code>def get_details(self, profile_page):
         self.driver.get(profile_page)
         name = self.driver.find_element_by_class_name('full-name').text
 
@@ -173,7 +173,7 @@ class LinkedInScraper():
 
 
 		<h3 style="text-align: center; margin-top: 60px;" ><b>Matching profiles</b></h3>
-		<p>Scraping part was just half of success. Another half was matching profiles and as it turned out, this part was harder. First I had to clean my results. There were too many profiles with just couple of details (e.g. just name). I created completeness measure (percentage of available profile details) and remove all results with score worse than 30%. After that I was able to compare each FB profile with each LN profile (Cartesian product).</p>
+		<p>Scraping part was just half of success. Another half was matching profiles and as it turned out, it was harder. First, I had to clean my results. There were too many profiles with just couple of details (e.g. just name). I created completeness measure (percentage of available profile details) and remove all results with score worse than 30%. After that I was able to compare each FB profile with each LN profile (Cartesian product).</p>
 		<p>As it was hack-a-thon project and time was limited I relied on string comparison (although in this case machine learning would for sure result in much better classification). Below is list with some of features I was compering:</p>
 		<ol>
 			<li><b>Name</b>
@@ -191,7 +191,7 @@ class LinkedInScraper():
 
 			<li><b>Schools and universities</b>
 				<p>I was checking if any of FB education is included in LN education history. This feature surprised me, because of LN language settings. At the beginning I was testing algorithms on my own full name and this features gave me perfect match. On my REAL FB, my past university name is written in English. Same way it has been seen from FAKE user perspective on my REAL LN account. Important fact is that at that point, my FAKE LN account was considered as ‘English’. It’s because only information about my fake user was that I live and work in London.</p>
-				<p>Later I added one Polish university to my FAKE LN education history. After that, language of my university on REAL LN profile has been seen from FAKE perspective as Polish. REAL FB still had English version and even though those were same universities, I had no match.</p>
+				<p>Later I added one Polish university to my FAKE LN education history. After that, language of my university on REAL LN profile has been seen from FAKE user perspective as Polish. REAL FB still had English version and even though those were same universities, I had no match.</p>
 			</li>
 
 			<li><b>People related to person</b>
