@@ -2,77 +2,72 @@
 
 {% block body_block %}
 
-<div class="container-fluid">
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            	<h2 class="section-heading">Get your proxy for free ?</h2>
+                <p> It is always nice to have proxies.... unfortunately, it is not the same while you have to pay for them. Especially when you just want quite reliable 
+				proxies from time to time, just for your personal scraping usage. You may not want to care about VPNs or whatever. What you can do?
+				<p>First and easiest thing which come to my mind is just to find free proxies list. There is a lot of them around Internet. What is a problem with that 
+				solution? Free proxies are crap... You can easily find lists with hundreds of them, but barely find there 10 nicely working proxies. Even if web-service
+				assure you that they checked those proxies 30s ago, you can't be sure if this proxy is really healthy.</p>
+				<p>So... if free proxy list are not perfect solution, should we start to look for another one? Isn't it annoying when you can see hundreds of potential
+				proxies and still can't use them efficiently? In this post, instead of searching other proxies source, I will try to get as much as I can from free
+				proxies list. Let's get started!</p>
+				<p>Idea is simple: scrape as much free proxies from different websites as you can, filter dead ones and finally - maintain rest of them to have up-to-date 
+				list. Even if just 5% of them will be healthy, if you can get 1000, then you end up with 50 ready-to-use proxies.  Sounds great for me.</p>
 
-	<div class="row">
-		<div class="col-xs-10 col-xs-offset-1">
+                <h2 class="section-heading">Step 1 – build scrapers</h2>
+				<p> It is not web-scraping tutorial and I assumes that you can make it by yourself. Just couple of advice here. A lot of top free proxies lists you can
+				find while doing google search doesn't want to be scraped to easily. You don't need to be afraid of advanced security and captcha, but it's likely that
+				you will have some small inconveniences. </p>
+				<p>For example, one of proxy provider hides behind CSS a lot of additional numbers and dots, which cannot be seen by human. When you go to page manually
+				everything is great, but when you check source you will realize that extraction won't be so trivial. You will need to create function to decipher proxy
+				host (check if styling is visible or not etc.). Another provider generates host dynamically using JavaScript. When you check page source you will find
+				just strange capital letters and numbers, which after checking JS function, occurs to be 64-bit encoded host.</p>
+				<p>Although such cases are not extremely hard, you need to be prepared for surprises.</p>
 
-		<h1 class="my_head"  id="first"> <span>Proxy harvester, 10.02.2016</span></h1>
-		<article>
+                <h2 class="section-heading">Step 2 – filter dead proxies</h2>
+                <p>OK, suppose that you already have your scrapers set, and you are getting nice 1k of free proxies. Most of them are useless and you need to filter them.
+				Good way of doing it is to use sites for checking your IP address (eg. http://icanhazip.com). Again – there is lots of them. It is nice to use couple of
+				them (just to be polite user). When you find proper sites, you just need to send http request there (remember to set reasonable connection time-out) and
+				check if host showed there is the same as host you were using. This way you will check not only if you are getting ANY response, but also if response is
+				exactly how it should be.</p>
 
-		<h3 style="text-align: center; margin-top: 60px;" ><b>Get your proxy for free ?</b></h3>
-		<p> It is always nice to have proxies.... unfortunately, it is not the same while you have to pay for them. Especially when you just want quite reliable 
-		proxies from time to time, just for your personal scraping usage. You may not want to care about VPNs or whatever. What you can do?
-		<p>First and easiest thing which come to my mind is just to find free proxies list. There is a lot of them around Internet. What is a problem with that 
-		solution? Free proxies are crap... You can easily find lists with hundreds of them, but barely find there 10 nicely working proxies. Even if web-service
-		assure you that they checked those proxies 30s ago, you can't be sure if this proxy is really healthy.</p>
-		<p>So... if free proxy list are not perfect solution, should we start to look for another one? Isn't it annoying when you can see hundreds of potential
-		proxies and still can't use them efficiently? In this post, instead of searching other proxies source, I will try to get as much as I can from free
-		proxies list. Let's get started!</p>
-		<p>Idea is simple: scrape as much free proxies from different websites as you can, filter dead ones and finally - maintain rest of them to have up-to-date 
-		list. Even if just 5% of them will be healthy, if you can get 1000, then you end up with 50 ready-to-use proxies.  Sounds great for me.</p>
+				<h2 class="section-heading">Step 3 – maintain your list</h2>
+				<p>You just filtered your proxies list – great! But how long this list would be valid? Free proxies status changes all the time. If you will use untouched
+				list for longer while, you will soon realize that it's getting more and more useless. So how can you maintain this list? Simply. Repeat step 2 from time
+				to time. What if your healthy proxy list is too short after couple of filtering processes? Repeat step 1 and get updated list from web-pages. 
+				And that's basically all you need to do. </p>
 
-		<h3 style="text-align: center; margin-top: 30px;" ><b>Step 1 – build scrapers</b></h3>
-		<p> It is not web-scraping tutorial and I assumes that you can make it by yourself. Just couple of advice here. A lot of top free proxies lists you can
-		find while doing google search doesn't want to be scraped to easily. You don't need to be afraid of advanced security and captcha, but it's likely that
-		you will have some small inconveniences. </p>
-		<p>For example, one of proxy provider hides behind CSS a lot of additional numbers and dots, which cannot be seen by human. When you go to page manually
-		everything is great, but when you check source you will realize that extraction won't be so trivial. You will need to create function to decipher proxy
-		host (check if styling is visible or not etc.). Another provider generates host dynamically using JavaScript. When you check page source you will find
-		just strange capital letters and numbers, which after checking JS function, occurs to be 64-bit encoded host.</p>
-		<p>Although such cases are not extremely hard, you need to be prepared for surprises.</p>
+				<h2 class="section-heading">Some other things nice to be aware of...</h2>
+				<p>Couple of more things which can be useful while creating you proxy scraper/checker...</p>
+				<ol>
+					<li> Use threading.., especially in step 1 and 2. You don't want to wait to long for you list to be completed and there is a lot of dead proxy to
+					filter.</li>
+					<li>Store your list in the way that it can be used by multiple tasks. You didn't build your list just for fun. You should be able to run later
+					multiple scrapers which can benefit from it.</li>
+					<li>Remember about access control and locking. If multiple tasks can access your list (which by the way changes constantly) it can be an important
+					issue.</li>
+					<li>Use proxy you just scraped to scrape proxies... While repeating step 1 you already should have some healthy free proxies. Why don't use them while
+					sending requests?</li>
+					<li>Set “back-up proxies” for your requests... Suppose everything works fine and you have your new free proxy list. Great, but still... you cannot be
+					100% sure of it. When you run other scrapers which use your free proxy list, think about mechanism of supporting failures. Personally I like concept
+					of back-up proxy: if free proxy fails, resend request with more reliable proxy or without it.</li>
+				</ol>
 
-		<h3 style="text-align: center; margin-top: 30px;" ><b>Step 2 – filter dead proxies</b></h3>
-		<p>OK, suppose that you already have your scrapers set, and you are getting nice 1k of free proxies. Most of them are useless and you need to filter them.
-		Good way of doing it is to use sites for checking your IP address (eg. http://icanhazip.com). Again – there is lots of them. It is nice to use couple of
-		them (just to be polite user). When you find proper sites, you just need to send http request there (remember to set reasonable connection time-out) and
-		check if host showed there is the same as host you were using. This way you will check not only if you are getting ANY response, but also if response is
-		exactly how it should be.</p>
-
-		<h3 style="text-align: center; margin-top: 30px;" ><b>Step 3 – maintain your list</b></h3>
-		<p>You just filtered your proxies list – great! But how long this list would be valid? Free proxies status changes all the time. If you will use untouched
-		list for longer while, you will soon realize that it's getting more and more useless. So how can you maintain this list? Simply. Repeat step 2 from time
-		to time. What if your healthy proxy list is too short after couple of filtering processes? Repeat step 1 and get updated list from web-pages. 
-		And that's basically all you need to do. </p>
-
-		<h3 style="text-align: center; margin-top: 30px;" ><b>Some other things nice to be aware of...</b></h3>
-		<p>Couple of more things which can be useful while creating you proxy scraper/checker...</p>
-		<ol>
-			<li> Use threading.., especially in step 1 and 2. You don't want to wait to long for you list to be completed and there is a lot of dead proxy to
-			filter.</li>
-			<li>Store your list in the way that it can be used by multiple tasks. You didn't build your list just for fun. You should be able to run later
-			multiple scrapers which can benefit from it.</li>
-			<li>Remember about access control and locking. If multiple tasks can access your list (which by the way changes constantly) it can be an important
-			issue.</li>
-			<li>Use proxy you just scraped to scrape proxies... While repeating step 1 you already should have some healthy free proxies. Why don't use them while
-			sending requests?</li>
-			<li>Set “back-up proxies” for your requests... Suppose everything works fine and you have your new free proxy list. Great, but still... you cannot be
-			100% sure of it. When you run other scrapers which use your free proxy list, think about mechanism of supporting failures. Personally I like concept
-			of back-up proxy: if free proxy fails, resend request with more reliable proxy or without it.</li>
-		</ol>
-
-		<h3 style="text-align: center; margin-top: 30px;" ><b>So... how good it is?</b></h3>
-		<p>Simple concept, some more work to actually make it happened. Is it worth? For me - yes. I've created exactly the same “application” I just described
-		and it works great. Check it out on my github (https://github.com/tulski-s)! I called it proxyHarvester (you can find it in 
-		<a href="https://github.com/tulski-s/robots">robots</a> repository). Usage is simple – you just run script. It will constantly scrape/filter/maintain and
-		save up-to-date free proxies list in specified location. </p>
-		<p>Although it is not enterprise solution, you should be able to scrape deeply a lot of domains without being blocked. And it costs nothing :) So check it
-		out and if you only want – contribute. Cheers! </p>
-
-		</article>
-
-		</div>
-	</div>
-</div>
+				<h2 class="section-heading">So... how good it is?</h2>
+				<p>Simple concept, some more work to actually make it happened. Is it worth? For me - yes. I've created exactly the same “application” I just described
+				and it works great. Check it out on my github! I called it proxyHarvester (you can find it in 
+				<a href="https://github.com/tulski-s/robots">robots</a> repository). Usage is simple – you just run script. It will constantly scrape/filter/maintain and
+				save up-to-date free proxies list in specified location. </p>
+				<p>Although it is not enterprise solution, you should be able to scrape deeply a lot of domains without being blocked. And it costs nothing :) So check it
+				out and if you only want – contribute. Cheers! </p>			
+                
+            </div>
+        </div>
+    </div>
+</article>
 
 {% endblock body_block %}

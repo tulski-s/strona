@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <p>Modern web is endless source of all kinds of data. Viewing those data only through web browser is limiting. This is where web scrapers come to play. Ability to programmatically access and extract internet resources opens a new broad range of possibilities for developers. Especially for those familiar with Python, as it is extremely powerful tool in this area.</p>
+                <p>When it comes to web scraping there are two major approaches – using APIs if web service provides one or parsing html files. Unfortunately, web services not always have APIs and parsing is perceived as time consuming, vulnerable for changes and lacking of capabilities to handle JavaScript. Although with good methodology and tools you can overcome some of those drawback, dealing with html can still be troublesome.</p>
+
+            	<h2 class="section-heading">How to tackle your problem then? </h2>
+                <p>Many developers tend to jump straight away into page source trying to locate appropriate HTML tags. Scraping tutorials and technical literature support this approach by focusing on specific Python libraries features. Although efficient usage of dedicated tools is extremely important, web scraping should be considered more like ‘hacky’ activity, than strictly technical task. Ability to quickly find hidden sitemap is more important than being able to build advanced web crawler. Realising that service is calling its internal API can make your job multiple times faster and your scraper more robust.</p>
+                <p><b>Note:</b><br>Examples showed in this post are real life examples. They are perfectly working at the time of writing, but it can change in future if page/urls structures can change… That is ALWAYS the case with scraping (although using APIs is more robust to changes).</p>
+
+                <h2 class="section-heading">Example 1 – Site map</h2>
+                <p>Imagine that you want to get some information from each restaurant page on <a href="https://www.skipthedishes.com/" target="_blank">SkipTheDishes</a>. First, check website and think how you can do it... One way is build a crawler, which will visit recursively all internal links found on given page. Building a crawler is in most cases the worst you can do - that’s just unnecessary brute force. Second, cleverer, way is to follow a pattern: <code>get categories -> get listing -> get item</code>. In our example it would look like this: first, you get links to categories (cities) from main pages (eg: <a href="https://www.skipthedishes.com/winnipeg/restaurants/all" target="_blank">Winnipeg All</a>). Then, for each of those links, you get listing (link to restaurants). You end up with with list of urls to all restaurants in all cities and you can iterate through that list to get your data (“get item” step). This pattern is really useful and you can apply it many web services.</p>
+                <p>But there is also another thing which can save your time – site map. Even if there is no explicit link on website which shows you site map, you can often just add ‘sitemap.xml’ to end of url and check what’s there. You will be surprised how often it will reveal all you need! That is the case here: <a href="https://www.skipthedishes.com/sitemap.xml" target="_blank">Sitemap</a>. With that, you can just directly get all links and then iterate though them to get what you need. Another common place where you can find clues about site map is robots.txt file. </p>
+
+                <h2 class="section-heading">Example 2 – Hidden API</h2>
+                <p>A lot of modern web services uses some kind of APIs internally. If you’re able to find this hidden treasure, you will save time and make you scraper more robust. Web appearance can change frequently (which will brake scrapers dependant on html tags), but API stays same for longer time. Also, responses from API contains often very structured data (e.g. in JSON or XML format).</p> 
+                <p>Easiest way to find out if web service is using APIs is track network in your developer’s tools. I like Chrome’s tools, but Firefox or Opera has nice ones also. Simply open your website and try to find out what kind of requests your browser is doing. Next example comes from one of my side projects. I wanted to create some python tools for quantitative analysis of polish stocks data. I started small research to see what kind of data and in what format is available on internet. It occurred that there is no public web service which offers API. You can see trade prices in your browser or download historical csv/txt files. But I wanted API. Ultimately I found 2 hidden APIs – one for live data and other one for historical. Here I will present acquiring historical polish stock data.</p>
+                <p><a href="http://www.parkiet.com/" target="_blank">Parkiet</a> is one of most popular polish service about GPW (polish stock exchange). You can get historical and near-real-time stock data there. If you navigate to companies’ page (e.g. <a href="http://www.parkiet.com/instrument/111182,4.html" target="_blank">ENEA</a>) you can see nice charts with pricing data. You can even select time window for prices. That was exactly what I was looking for. I opened new incognito window and developer’s tools (with ‘Network’ tab). Investigating web services internals with incognito mode is almost always good idea, because otherwise stored cookies can change site behaviour. I started checking what kind of requests my browser is sending. Within this process is often helpful to reload page, clear network and click something etc. Play around with web service. You need to see what’s there.</p>
+                <p>In my case answer was easy. Each time when I changed time window my browser was sending new requests to fetch data for chart. I investigated request deeper. It occurred that:
+                <ol>
+                    <li>Request endpoint was: http://www.parkiet.com/WarsetServer/XMLServer</li>
+                    <li>It was GET request</li>
+                    <li>No authentication headers were mandatory (in many cases you need to pass some tokens or API keys, but not here)</li>
+                    <li>Couple of parameters had to be passed:
+                        <ul>
+                            <li>‘ext’ - after couple of trials I realised that it will always be equal to 1</li>
+                            <li>‘entityId’ – it was company id (you can get it by calling yet another endpoint or get if from html)</li>
+                            <li>'type' should be 'zamk_dates' if I want to have open, high, low, closing and volume data</li>
+                            <li>‘start’ and ‘stop’ date in proper format</li>
+                        </ul>
+                    </li>
+                </ol></p>
+
+                <p>Example requests in python was:</p>
+                <pre>
+                    <code>
+import requests
+
+endpoint = 'http://www.parkiet.com/WarsetServer/XMLServer'
+params = {'entityId': 111182, 'ext': 1, 'start': '1990,1,1', 'type': 'zamk_dates', 'stop': '2016,9,8'}
+r = requests.get(url, params=params)
+                    </code>
+                </pre>
+                <p>That’s all. I was able to plug this into my tools and get dynamically historical data for my analysis tool.</p>
+
+                <h2 class="section-heading">What you should remember?</h2>
+                <p>You can meet hidden sitemaps or APIs very often, but at the very beginning it can be tricky. There can be a lot of strange requests visible in your Network tab. Sometimes you need to supply additional information with your request (like API keys or token). I had cases where I had to combine parsing html and emulating API requests. For example, there was extremely nice API endpoint, but authorization key was mandatory. What is nice, is that when I checked page source code I found it hardcoded there. Hooking on web service APIs are useful especially when this is dynamic kind of web-service. E.g. calculator-like, where you need to choose some options and hit calculate (or whatever).</p>
+                <p>You will not always be able to use technics presented in this post. Sometimes, parsing html is the only thing you can do or you need to mix more techniques. The most important thing is: web scraping is more than just parsing html. Be more ‘hacky’. You will be able to get more data than you think.</p>
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock body_block %}

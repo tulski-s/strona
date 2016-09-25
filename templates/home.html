@@ -1,40 +1,55 @@
 {% extends "base.html" %}
 
-
 {% block body_block %}
 
-<div class="row">
-	<div class="col-xs-12">
-		<div class="jumbotron">
-			<div class="container">
-				<h1>Slawomir Tulski</h1>
-				<p class="lead">Big Data Engineer</p>
-			</div>
-		</div>
-	</div>
-</div>
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-<div class="row">
-	<div class="col-xs-10 col-xs-offset-1">
-		<blockquote>
-			“We are drowning in information and starving for knowledge.”
-			<cite>Rutherford D. Rogers</cite>
-		</blockquote>
+        <div class="post-preview">
+            <a href="more_than">
+                <h2 class="post-title">
+                    Web scraping is more than just parsing HTML...
+                </h2>
+                <h3 class="post-subtitle">
+                   Modern web is endless source of all kinds of data. Viewing those data only through web browser is limiting. This is where web scrapers come to play. Ability to programmatically access and extract internet resources opens a new broad range of possibilities for developers.
+                </h3>
+            </a>
+            <p class="post-meta">Posted by <a href="/home">Slaw</a> on September 24, 2016</p>
+        </div>
+        <hr>
 
-		<h1 class="my_head"> <span>Creepy Scraper, 14.05.2016</span></h1>
-		<article>
-			<p>Nowadays, it’s not a problem to find personal information about someone. And I’m not talking about famous people. Everyone dumps tons of data about themselves into various social media. It’s part of our lifestyle now and I am not visionary here. Is it good or bad? It’s not topic for this post. But it lies close to it. There are two short stories which inspired me to create little site project called ‘Creepy Scraper’. I’ve shown it on one of the hack-day in my workplace.
-			</p>
-			<div style="text-align: center; margin-top: 20px;"><a href="/creepy_scraper"><b>...Read more...</b></a></div>
-		</article>
+            <div class="post-preview">
+                <a href="creepy_scraper">
+                    <h2 class="post-title">
+                        Creepy Scraper
+                    </h2>
+                    <h3 class="post-subtitle">
+                        Nowadays, it’s not a problem to find personal information about someone. And I’m not talking about famous people. Everyone dumps tons of data about themselves into various social media. It’s part of our lifestyle now and I am not visionary here. Is it good or bad? It’s not topic for this post. But it lies close to it...
+                    </h3>
+                </a>
+                <p class="post-meta">Posted by <a href="/home">Slaw</a> on May 14, 2016</p>
+            </div>
+            <hr>
+            <div class="post-preview">
+                <a href="/proxy_harvester">
+                    <h2 class="post-title">
+                        Proxy harvester
+                    </h2>
+                    <h3 class="post-subtitle">
+                        It is always nice to have proxies.... unfortunately, it is not the same while you have to pay for them. Especially when you just want quite reliable proxies from time to time, just for your personal scraping usage. You may not want to care about VPNs or whatever. What you can do?
+                    </h3>
+                </a>
+                <p class="post-meta">Posted by <a href="/home">Slaw</a> on February 10, 2016</p>
+            </div>
+            <hr>
 
-		<h1 class="my_head"> <span>Proxy harvester, 10.02.2016</span></h1>
-		<article>
-			<p>It is always nice to have proxies.... unfortunately, it is not the same while you have to pay for them. Especially when you just want quite reliable proxies from time to time, just for your personal scraping usage. You may not want to care about VPNs or whatever. What you can do?</p>
-			<div style="text-align: center; margin-top: 20px;"><a href="/proxy_harvester"><b>...Read more...</b></a></div>
-		</article>
-
-	</div>
-</div>
+            <!-- Pager -->
+            <ul class="pager">
+                <li class="next">
+                    <a href="#">Older Posts &rarr;</a>
+                </li>
+            </ul>
+        </div>
+    </div>
 
 {% endblock body_block %}
