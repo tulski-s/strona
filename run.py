@@ -45,5 +45,41 @@ def more_than():
                             title_on_img='Web Scraping',
                             subheading_img='more than just parsing HTML')
 
+@app.route('/price_movement')
+def price_movement():
+    return render_template('price_movement.html', 
+                            bg_img='b.jpg',
+                            title_on_img='Price movement',
+                            subheading_img='prediction using decision tree')
+
+@app.route('/comparing_listening')
+def comparing_listening():
+    return render_template('comparing_listening.html', 
+                            bg_img='b.jpg',
+                            title_on_img='Comparing listening',
+                            subheading_img='of music 2008 vs 2016')
+
+@app.route('/lastfm_sqls')
+def lastfm_sqls():
+    return render_template('comparing_listening_sql.html', 
+                            bg_img='b.jpg',
+                            title_on_img='SQL for analysis',
+                            subheading_img='Comparing listening of music: 2008 vs 2016')
+
+@app.route('/hive_redshift_test')
+def hive_vs_redshift():
+    return render_template('hive_redshift_test.html', 
+                            bg_img='b.jpg',
+                            title_on_img='Hadoop/Hive vs. Redshift',
+                            subheading_img='as ETL(ELT) tool')
+
+@app.route('/hate_speech')
+def hate_speech():
+    return render_template('hate_speech.html', 
+                            bg_img='b.jpg',
+                            title_on_img='Recognition of hate speech',
+                            subheading_img='in Facebook comments')
+
+
 if __name__ == '__main__':
     app.run(debug=True)

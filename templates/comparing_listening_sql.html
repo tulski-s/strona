@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <pre>
+                    <code>    
+-- SQL QUERIES
+CREATE TABLE scrobles (
+        created_at      TIMESTAMP WITHOUT TIME ZONE,
+        track_title     VARCHAR,
+        artist_name     VARCHAR,
+        album_title     VARCHAR
+);
+
+-- how many songs i've listened in 2008 and 2016?
+SELECT SUM(CASE WHEN EXTRACT('year' FROM created_at) = 2008 THEN 1 ELSE 0 END) AS tracks_cnt_2008,
+       SUM(CASE WHEN EXTRACT('year' FROM created_at) = 2016 THEN 1 ELSE 0 END) AS tracks_cnt_2016
+  FROM sb_stulski.scrobles
+ WHERE EXTRACT('year' FROM created_at) = 2008
+       OR EXTRACT('year' FROM created_at) = 2016
+;
+
+-- what are top X bands?
+SELECT d08.artist_name, d08.played_cnt,
+       d16.artist_name, d16.played_cnt
+  FROM (SELECT artist_name, 
+               COUNT(*) AS played_cnt,
+               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rn
+          FROM sb_stulski.scrobles
+         WHERE EXTRACT('year' FROM created_at) = 2008
+         GROUP BY artist_name
+         ORDER BY COUNT(*) DESC) d08
+ INNER JOIN (SELECT artist_name, 
+               COUNT(*) AS played_cnt,
+               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rn
+          FROM sb_stulski.scrobles
+         WHERE EXTRACT('year' FROM created_at) = 2016
+         GROUP BY artist_name
+         ORDER BY COUNT(*) DESC) d16 ON d08.rn = d16.rn
+  WHERE d08.rn <= 15
+;
+
+-- what are top X songs?
+SELECT d08.track_title, d08.played_cnt,
+       d16.track_title, d16.played_cnt
+  FROM (SELECT track_title, 
+               COUNT(*) AS played_cnt,
+               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rn
+          FROM sb_stulski.scrobles
+         WHERE EXTRACT('year' FROM created_at) = 2008
+         GROUP BY track_title
+         ORDER BY COUNT(*) DESC) d08
+ INNER JOIN (SELECT track_title, 
+               COUNT(*) AS played_cnt,
+               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rn
+          FROM sb_stulski.scrobles
+         WHERE EXTRACT('year' FROM created_at) = 2016
+         GROUP BY track_title
+         ORDER BY COUNT(*) DESC) d16 ON d08.rn = d16.rn
+  WHERE d08.rn <= 10
+;
+
+
+-- what are top X albums?
+SELECT d08.album_title, d08.played_cnt,
+       d16.album_title, d16.played_cnt
+  FROM (SELECT album_title, 
+               COUNT(*) AS played_cnt,
+               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rn
+          FROM sb_stulski.scrobles
+         WHERE EXTRACT('year' FROM created_at) = 2008 
+               AND album_title IS NOT NULL
+         GROUP BY album_title
+         ORDER BY COUNT(*) DESC) d08
+ INNER JOIN (SELECT album_title, 
+               COUNT(*) AS played_cnt,
+               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rn
+          FROM sb_stulski.scrobles
+         WHERE EXTRACT('year' FROM created_at) = 2016
+         GROUP BY album_title
+         ORDER BY COUNT(*) DESC) d16 ON d08.rn = d16.rn
+  WHERE d08.rn <= 10
+;
+
+
+-- what is contribution of top songs to all listenings from given year
+SELECT d08.ntile_group, d08.total_perct, d16.total_perct
+  FROM (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                ntile_group
+          FROM (SELECT COUNT(*) AS played_cnt,
+                       NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                  FROM sb_stulski.scrobles
+                 WHERE EXTRACT('year' FROM created_at) = 2008
+                 GROUP BY track_title
+                 ORDER BY COUNT(*) DESC) a
+         CROSS JOIN (SELECT COUNT(*) AS total_songs
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2008) ts
+         GROUP BY ntile_group, ts.total_songs) d08
+ INNER JOIN (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                     ntile_group
+               FROM (SELECT COUNT(*) AS played_cnt,
+                            NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2016
+                      GROUP BY track_title
+                      ORDER BY COUNT(*) DESC) a
+              CROSS JOIN (SELECT COUNT(*) AS total_songs
+                            FROM sb_stulski.scrobles
+                           WHERE EXTRACT('year' FROM created_at) = 2016) ts
+              GROUP BY ntile_group, ts.total_songs) d16 ON d08.ntile_group = d16.ntile_group
+ ORDER BY d08.ntile_group
+;
+
+
+-- what is contribution of top artists to all listenings from given year
+SELECT d08.ntile_group, d08.total_perct, d16.total_perct
+  FROM (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                ntile_group
+          FROM (SELECT COUNT(*) AS played_cnt,
+                       NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                  FROM sb_stulski.scrobles
+                 WHERE EXTRACT('year' FROM created_at) = 2008
+                 GROUP BY artist_name
+                 ORDER BY COUNT(*) DESC) a
+         CROSS JOIN (SELECT COUNT(*) AS total_songs
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2008) ts
+         GROUP BY ntile_group, ts.total_songs) d08
+ INNER JOIN (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                     ntile_group
+               FROM (SELECT COUNT(*) AS played_cnt,
+                            NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2016
+                      GROUP BY artist_name
+                      ORDER BY COUNT(*) DESC) a
+              CROSS JOIN (SELECT COUNT(*) AS total_songs
+                            FROM sb_stulski.scrobles
+                           WHERE EXTRACT('year' FROM created_at) = 2016) ts
+              GROUP BY ntile_group, ts.total_songs) d16 ON d08.ntile_group = d16.ntile_group
+ ORDER BY d08.ntile_group
+;
+
+
+-- what is contribution of top albums to all listenings from given year
+SELECT d08.ntile_group, d08.total_perct, d16.total_perct
+  FROM (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                ntile_group
+          FROM (SELECT COUNT(*) AS played_cnt,
+                       NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                  FROM sb_stulski.scrobles
+                 WHERE EXTRACT('year' FROM created_at) = 2008
+                 GROUP BY album_title
+                 ORDER BY COUNT(*) DESC) a
+         CROSS JOIN (SELECT COUNT(*) AS total_songs
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2008) ts
+         GROUP BY ntile_group, ts.total_songs) d08
+ INNER JOIN (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                     ntile_group
+               FROM (SELECT COUNT(*) AS played_cnt,
+                            NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2016
+                      GROUP BY album_title
+                      ORDER BY COUNT(*) DESC) a
+              CROSS JOIN (SELECT COUNT(*) AS total_songs
+                            FROM sb_stulski.scrobles
+                           WHERE EXTRACT('year' FROM created_at) = 2016) ts
+              GROUP BY ntile_group, ts.total_songs) d16 ON d08.ntile_group = d16.ntile_group
+ ORDER BY d08.ntile_group
+;
+
+-- what is contribution of top albums to all listenings from given year
+SELECT d08.ntile_group, d08.total_perct, d16.total_perct
+  FROM (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                ntile_group
+          FROM (SELECT COUNT(*) AS played_cnt,
+                       NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                  FROM sb_stulski.scrobles
+                 WHERE EXTRACT('year' FROM created_at) = 2008
+                 GROUP BY album_title
+                 ORDER BY COUNT(*) DESC) a
+         CROSS JOIN (SELECT COUNT(*) AS total_songs
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2008) ts
+         GROUP BY ntile_group, ts.total_songs) d08
+ INNER JOIN (SELECT (SUM(played_cnt)/ts.total_songs)*100 AS total_perct,
+                     ntile_group
+               FROM (SELECT COUNT(*) AS played_cnt,
+                            NTILE(10) OVER (ORDER BY COUNT(*) DESC) AS ntile_group
+                       FROM sb_stulski.scrobles
+                      WHERE EXTRACT('year' FROM created_at) = 2016
+                      GROUP BY album_title
+                      ORDER BY COUNT(*) DESC) a
+              CROSS JOIN (SELECT COUNT(*) AS total_songs
+                            FROM sb_stulski.scrobles
+                           WHERE EXTRACT('year' FROM created_at) = 2016) ts
+              GROUP BY ntile_group, ts.total_songs) d16 ON d08.ntile_group = d16.ntile_group
+ ORDER BY d08.ntile_group
+;
+
+
+-- at which hours i'm listening music most 
+WITH RECURSIVE hours(hour_) AS (
+        SELECT 0.0 AS h
+         UNION ALL 
+        SELECT hour_ + 1.0
+          FROM hours
+         WHERE hour_ <= 22.0
+)
+SELECT h.hour_,
+       CASE WHEN cnt_scrobles8 IS NOT NULL THEN cnt_scrobles8 ELSE 0 END AS year8,
+       CASE WHEN cnt_scrobles16 IS NOT NULL THEN cnt_scrobles16 ELSE 0 END AS year16
+  FROM hours h
+  LEFT JOIN (SELECT EXTRACT('hour' FROM created_at) as hour_, COUNT(*) AS cnt_scrobles8
+               FROM sb_stulski.scrobles
+              WHERE EXTRACT('year' FROM created_at) = 2008
+                    AND EXTRACT('dow' FROM created_at) IN (1,2,3,4,5)
+                    --AND EXTRACT('dow' FROM created_at) IN (0,6)
+              GROUP BY EXTRACT('hour' FROM created_at)) s8 ON s8.hour_ = h.hour_
+  LEFT JOIN (SELECT EXTRACT('hour' FROM created_at) as hour_, COUNT(*) AS cnt_scrobles16
+               FROM sb_stulski.scrobles
+              WHERE EXTRACT('year' FROM created_at) = 2016
+                    AND EXTRACT('dow' FROM created_at) IN (1,2,3,4,5)
+                    --AND EXTRACT('dow' FROM created_at) IN (0,6)
+              GROUP BY EXTRACT('hour' FROM created_at)) s16 ON s16.hour_ = h.hour_
+ ORDER BY 1
+;
+
+
+-- at which dow i'm listening music most 
+WITH RECURSIVE dow(d) AS (
+        SELECT 0 AS d
+         UNION ALL 
+        SELECT d + 1
+          FROM dow
+         WHERE d <= 5
+)
+SELECT dow.d,
+       CASE WHEN cnt_scrobles08 IS NOT NULL THEN cnt_scrobles08 ELSE 0 END AS year8,
+       CASE WHEN cnt_scrobles16 IS NOT NULL THEN cnt_scrobles16 ELSE 0 END AS year16
+  FROM dow
+  LEFT JOIN (SELECT EXTRACT('dow' FROM created_at) as d, COUNT(*) AS cnt_scrobles08
+               FROM sb_stulski.scrobles
+              WHERE EXTRACT('year' FROM created_at) = 2008
+              GROUP BY EXTRACT('dow' FROM created_at)) s8 ON s8.d = dow.d
+  LEFT JOIN (SELECT EXTRACT('dow' FROM created_at) as d, COUNT(*) AS cnt_scrobles16
+               FROM sb_stulski.scrobles
+              WHERE EXTRACT('year' FROM created_at) = 2016
+              GROUP BY EXTRACT('dow' FROM created_at)) s16 ON s16.d = dow.d
+ ORDER BY 1
+;
+
+-- how many distinct bands i've listened
+SELECT 2008, COUNT(DISTINCT artist_name)
+  FROM sb_stulski.scrobles
+ WHERE EXTRACT('year' FROM created_at) = 2008
+UNION ALL
+SELECT 2016, COUNT(DISTINCT artist_name)
+  FROM sb_stulski.scrobles
+ WHERE EXTRACT('year' FROM created_at) = 2016
+;
+
+-- how many distinct songs i've listened
+SELECT 2008 AS year, COUNT(DISTINCT track_title)
+  FROM sb_stulski.scrobles
+ WHERE EXTRACT('year' FROM created_at) = 2008
+UNION ALL
+SELECT 2016 AS year, COUNT(DISTINCT track_title)
+  FROM sb_stulski.scrobles
+ WHERE EXTRACT('year' FROM created_at) = 2016
+;
+
+-- what was the longest sequence of listening the same song in reapeat-loop
+SELECT d8.rank, 
+       d8.track_title AS track2008, 
+       d8.artist_name AS artist2008,
+       d8.seq AS listened_times_2008,
+       d16.track_title AS track_2016, 
+       d16.artist_name AS artist2016,
+       d16.seq AS listened_times_2016
+  FROM (SELECT ROW_NUMBER() OVER(ORDER BY COUNT(*) DESC) AS rank,
+               s3.track_title, s3.artist_name,
+               COUNT(*) AS seq
+          FROM (SELECT s2.rn, s2.track_title, s2.artist_name,
+                       COUNT(step OR NULL) OVER (PARTITION BY track_title, artist_name ORDER BY rn) AS grp 
+                  FROM (SELECT rn, track_title, artist_name
+                               ,(LAG(rn) OVER (PARTITION BY track_title, artist_name ORDER BY rn) + 1) IS DISTINCT FROM rn AS step
+                          FROM (SELECT ROW_NUMBER() OVER (ORDER BY created_at) AS rn,
+                                       track_title, 
+                                       artist_name
+                                  FROM sb_stulski.scrobles
+                                 WHERE EXTRACT('year' FROM created_at) = '2008') s1
+                         ORDER BY rn) s2) s3
+          GROUP BY s3.track_title, s3.artist_name, s3.grp) d8
+  INNER JOIN (SELECT ROW_NUMBER() OVER(ORDER BY COUNT(*) DESC) AS rank,
+                       s3.track_title, s3.artist_name,
+                       COUNT(*) AS seq
+                  FROM (SELECT s2.rn, s2.track_title, s2.artist_name,
+                               COUNT(step OR NULL) OVER (PARTITION BY track_title, artist_name ORDER BY rn) AS grp 
+                          FROM (SELECT rn, track_title, artist_name
+                                       ,(LAG(rn) OVER (PARTITION BY track_title, artist_name ORDER BY rn) + 1) IS DISTINCT FROM rn AS step
+                                  FROM (SELECT ROW_NUMBER() OVER (ORDER BY created_at) AS rn,
+                                               track_title, 
+                                               artist_name
+                                          FROM sb_stulski.scrobles
+                                         WHERE EXTRACT('year' FROM created_at) = '2016') s1
+                                 ORDER BY rn) s2) s3
+                  GROUP BY s3.track_title, s3.artist_name, s3.grp) d16 ON d8.rank = d16.rank
+  ORDER BY d8.rank ASC
+;
+
+-- what rations of artists I played in 2008 i was still listenining in 2016
+SELECT ROUND((COUNT(*)::numeric/MAX(total_bands.cnt))*100, 2)
+  FROM (SELECT s1.artist_name
+          FROM (SELECT s.track_title, s.artist_name
+                  FROM sb_stulski.scrobles s
+                 WHERE EXTRACT('year' FROM created_at) = '2008'
+                 GROUP BY s.track_title, s.artist_name) s1
+         INNER JOIN (SELECT track_title, artist_name
+                       FROM sb_stulski.scrobles s
+                      WHERE EXTRACT('year' FROM created_at) = '2016'
+                      GROUP BY s.track_title, s.artist_name) s2 ON s1.artist_name = s2.artist_name
+         GROUP BY s1.artist_name) b
+ CROSS JOIN (SELECT COUNT(DISTINCT artist_name) AS cnt
+               FROM sb_stulski.scrobles
+              WHERE EXTRACT('year' FROM created_at) = 2008) total_bands
+;
+
+-- how many from bands still listened in 2016 were in top bands in 2008
+SELECT s1.artist_name
+  FROM (SELECT s.track_title, s.artist_name
+          FROM sb_stulski.scrobles s
+         WHERE EXTRACT('year' FROM created_at) = '2008'
+         GROUP BY s.track_title, s.artist_name) s1
+ INNER JOIN (SELECT track_title, artist_name
+               FROM sb_stulski.scrobles s
+              WHERE EXTRACT('year' FROM created_at) = '2016'
+              GROUP BY s.track_title, s.artist_name) s2 ON s1.artist_name = s2.artist_name
+ INNER JOIN (SELECT artist_name, 
+                    COUNT(*) AS played_cnt
+               FROM sb_stulski.scrobles
+              WHERE EXTRACT('year' FROM created_at) = 2008
+              GROUP BY artist_name
+              ORDER BY COUNT(*) DESC
+              LIMIT 15) top8 ON top8.artist_name = s1.artist_name
+ GROUP BY s1.artist_name
+;
+                    </code>
+                </pre>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock body_block %}

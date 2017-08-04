@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <p>Having account on <a href="http://www.last.fm/user/Tulak" target="_blank">last.fm</a> since 2005, now I have archive with more than 162 thousands of tracks recorded. For those who do not know, service is recording details of of tracks the user listens to from multiple devices (I’m using it solely on PC).</p>
+                <p>Although you can view some basic statistics and nice charts on your last.fm profile page, I decided to take a little bit closer look at what I have listened to. What interested me the most, was how my music taste and listening patterns changed over time. For comparison, I took two time periods: year 2008 and 2016. Back in 2008 I was high school pupil in Poland and in 2016 I had Spotify account and worked as data engineer in London.</p>
+
+                <h2 class="section-heading">Data acquisition and processing tools </h2>
+                <p>To get historical tracks which I have listened to (or as last.fm calls them – “scrobbles”), I have used <a href="http://www.last.fm/api/rest" target="_blank">last.fm RESTful API</a>. Actually, I found <a href="https://gist.github.com/bitmorse/5201491" target="_blank">this code</a> on github, so I did not have to write anything by myself. After export, I dumped results into postgres database. You can find all SQL queries I have used for analysis <a href="/lastfm_sqls" target="_blank">here.</a></p>
+                <p>I have also used MusicBrainz to get band details like tags, band formation date and origin country. Tags could be easily acquired from last.fm, but rest of information were easier to get from <a href="https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2" target="_blank"> MusicBrainz API.</a> This dataset, was not dumped into postgres. It was easier to handle those data with Python and Pandas, because of tags, which were not well structured.</p>
+
+                <h2 class="section-heading">Artists I have listened to</h2>
+                <p>In 2008 I have listened 15,908 songs and 179 distinct bands. In 2016 - 19,300 songs and 1265 bands. That gives increase of 700% in number of bands, and at the same time, increase in scrobbles only by 20%. As a results, same bands were listened more often in 2008 than in 2016. This situation is shown by lines in Fig. 1.</p>
+                <p><img src="static/img/lastfm_fig1.png" class="img-responsive img-rounded center-block" alt="Fig.1"></p>
+                <p>Majority of bands I have listened to in 2016 are ‘new’ bands. As can be spotted in Tab.1 none of top 10 mostly listened bands in 2008 and 2016 overlap. From all bands being listened to in year 2008, only 28 of them were recorded in 2016. From those 28 bands, six of them are present in Tab.1.
+                    <table style="width:100%">
+                            <caption>Tab.1 Top 10 music bands in 2008 and 2016</caption>
+                            <tr> 
+                                <th colspan="2" style="text-align:center;">2008</th> 
+                                <th colspan="2" style="text-align:center;">2016</th> 
+                            </tr>
+                            <tr> 
+                                <th>Band name</td> 
+                                <th>Scrobbles count</td>
+                                <th>Band name</td> 
+                                <th>Scrobbles count</td>
+                            </tr>
+                            <tr> <td>DIR EN GREY</td> <td>2148</td> <td>Boris</td> <td>865</td> </tr>
+                            <tr> <td>Kiss</td> <td>1960</td> <td>Melanchoholics</td> <td>451</td> </tr>
+                            <tr> <td>X Japan</td> <td>1221</td> <td>Elegi</td> <td>373</td> </tr>
+                            <tr> <td>Calmando Qual</td> <td>940</td> <td>John Coltrane</td> <td>367</td> </tr>
+                            <tr> <td>Loudness</td> <td>887</td> <td>Drudkh</td> <td>306</td> </tr>
+                            <tr> <td>SEX MACHINEGUNS</td> <td>591</td> <td>Miles Davis</td> <td>244</td> </tr>
+                            <tr> <td>Galneryus</td> <td>389</td> <td>Sólstafir</td> <td>241</td> </tr>
+                            <tr> <td>Hide</td> <td>355</td> <td>Napalm Death</td> <td>237</td> </tr>
+                            <tr> <td>陰陽座</td> <td>299</td> <td>Grails</td> <td>236</td> </tr>
+                            <tr> <td>Nightmare</td> <td>298</td> <td>Causa Sui</td> <td>234</td> </tr>
+                        </table>
+                </p>
+                <p>As can be seen in Tab.1 in 2008 bands column, there are some Japanese names there. Actually, 9 from 10 of those bands originate from Japan. That is not surprising for me, as I was extreme Japanese music back then. Although I still listen a lot of Japanese bands (e.g. mostly listened band in 2016 is also from Japan), in 2016, I am not limiting myself to bands from certain country anymore. That can be observed in Fig.2 and Fig.3, which presents countries from which bands I have listened to come from.</p>
+                <p>
+                    <figure>
+                        <figcaption>Fig.2 - Bands origins in 2008</figcaption>
+                        <img src="static/img/m2008.png" class="img-responsive img-rounded center-block" alt="Fig.2">
+                    </figure>
+                </p>
+                <p>
+                    <figure>
+                        <figcaption>Fig.3 - Bands origins in 2016</figcaption>
+                        <img src="static/img/m2016.png" class="img-responsive img-rounded center-block" alt="Fig.3">
+                    </figure>
+                </p>
+
+                <p>Further, I have grouped available tags determining music genre for given band. That is presented in Tab.2. As can be observed, over the years, I have become more open to different kind of music. In 2008 there are mostly rock/metal bands with some jazz. In 2016, next to different extreme metal music, genres like jazz, classical, electronic and ambient are present.
+                    <table style="width:100%">
+                            <caption>Tab.2 Band's tags</caption>
+                            <tr> 
+                                <th colspan="2" style="text-align:center;">2008</th> 
+                                <th colspan="2" style="text-align:center;">2016</th> 
+                            </tr>
+                            <tr> 
+                                <th>Tag name</td> 
+                                <th>Scrobbles count</td>
+                                <th>Tag name</td> 
+                                <th>Scrobbles count</td>
+                            </tr>
+                            <tr> <td>#rock</td> <td>16</td> <td>#metal</td> <td>79</td> </tr>
+                            <tr> <td>#japanese</td> <td>13</td> <td>#black metal</td> <td>76</td> </tr>
+                            <tr> <td>#alternative rock</td> <td>9</td> <td>#death metal</td> <td>69</td> </tr>
+                            <tr> <td>#pop rock</td> <td>8</td> <td>#jazz</td> <td>63</td> </tr>
+                            <tr> <td>#heavy metal</td> <td>7</td> <td>#classical</td> <td>44</td> </tr>
+                            <tr> <td>#pop</td> <td>7</td> <td>#composer</td> <td>42</td> </tr>
+                            <tr> <td>#american</td> <td>6</td> <td>#rock</td> <td>40</td> </tr>
+                            <tr> <td>#rock and indie</td> <td>6</td> <td>#doom metal</td> <td>37</td> </tr>
+                            <tr> <td>#jazz</td> <td>5</td> <td>#hard bop</td> <td>34</td> </tr>
+                            <tr> <td>#visual kei</td> <td>5</td> <td>#jazz and blues</td> <td>33</td> </tr>
+                            <tr> <td>#hard rock</td> <td>5</td> <td>#electronic</td> <td>31</td> </tr>
+                            <tr> <td>#jazz fusion</td> <td>4</td> <td>#ambient</td> <td>28</td> </tr>
+                            <tr> <td>#power metal</td> <td>4</td> <td>#grindcore</td> <td>27</td> </tr>
+                            <tr> <td>#jpop</td> <td>4</td> <td>#british</td> <td>26</td> </tr>
+                        </table>
+                </p>
+                <p>I also ordered descending bands by count of scrobbles and divided them into 10 equal size groups (deciles). Next I calculated contribution of given decile into overall listenings. Interestingly, results in 2008 and 2016 are really similar. That can be seen in Fig.4. In both cases, top 10% bands contribute to ~68% of all listenings in given year and ~90% percent of all scrobbles belongs to only 30% top bands. <img src="static/img/lastfm_fig4.png" class="img-responsive img-rounded center-block" alt="Fig.4"></p>
+
+                <h2 class="section-heading">Tracks I have listened to</h2>
+                <p>I have listened to 15,908 and 19,300 tracks in 2008 and 2016 respectively. Assuming that average track length is 4 minutes, it gives ~44 and ~54 whole days of listening to music. As I am using last.fm only from my desktop devices, this number does not include scrobbles from mp3 players or smartphones.</p>
+                
+                <p>In 2008, I have listened 2922 distinct songs and in 2016 - 9405. That is ~3x more distinct songs in compared to ~7x more distinct bands in 2016. In other words, in 2008 I have listened quite a lot of different tracks from the same bands, whereas in 2016 I have listened a lot of different bands, but I did not explore a lot of their tracks.</p>
+
+                <p>Tab.3 presents top 10 mostly listened songs for both time periods. In 2008, there is clear domination of first position followed by rapid decline. Difference in scrobbles count for 1st and 10th position is 81. In 2016, number of scrobbles is almost equal across all top 10 tracks. Difference between 1st and 10th position is just 4.
+                    <table style="width:100%">
+                            <caption>Tab.3 Top 10 tracks in 2008 and 2016</caption>
+                            <tr> 
+                                <th colspan="2" style="text-align:center;">2008</th> 
+                                <th colspan="2" style="text-align:center;">2016</th> 
+                            </tr>
+                            <tr> 
+                                <th>Track title</td> 
+                                <th>Scrobbles count</td>
+                                <th>Track title</td> 
+                                <th>Scrobbles count</td>
+                            </tr>
+                            <tr> <td>Glass Skin</td> <td>145</td> <td>Rotten City Radio</td> <td>36</td> </tr>
+                            <tr> <td>I.V.</td> <td>88</td> <td>Hiring Bearded Women</td> <td>35</td> </tr>
+                            <tr> <td>smash them</td> <td>87</td> <td>Paranoia Lodge</td> <td>35</td> </tr>
+                            <tr> <td>AGITATED SCREAMS OF MAGGOTS -UNPLUGGED-</td> <td>82</td> <td>Adam Dunkel</td> <td>35</td> </tr>
+                            <tr> <td>undecided (glass skin ver.)</td> <td>79</td> <td>Solar Café</td> <td>35</td> </tr>
+                            <tr> <td>Ryoujoku no ame (LIVE take at YOKOHAMA BLITZ on May 23.2008)</td> <td>77</td> <td>Presence Of Absence</td> <td>33</td> </tr>
+                            <tr> <td>life</td> <td>74</td> <td>Minus1One</td> <td>33</td> </tr>
+                            <tr> <td>I Still Love You</td> <td>70</td> <td>Nuclear welfare</td> <td>32</td> </tr>
+                            <tr> <td>Without you [live 28.03.2008]</td> <td>64</td> <td>My Friend of Misery</td> <td>32</td> </tr>
+                            <tr> <td>Taiyo to Syounen</td> <td>64</td> <td>The end belongs to this world</td> <td>32    </td> </tr>
+                        </table>
+                </p>
+                <p>I have also check how often I have listened to one song in an uninterrupted sequence. Here also significant difference can be noticed. For 2008, three longest track sequences are 47, 24 and 22. In 2016, result is 19, 11 and 8. Checking year 2016 more carefully I realized that 2nd song which was listened to 11 times in a row was ‘Untitled’ by Thomas Köner from Nunatak. That album has 12 tracks with the same title – ‘Untitled’…. After that discovery, ranking changed to following sequence: 19, 8 and 7.</p>
+
+                <h2 class="section-heading">When I listen to music?</h2>
+                <p>Next thing I have checked, was at what hours during day I listened music to. For that purpose, I made distinction between weekdays and weekends. I suspected weekday’s listening pattern to be different, because of fact that in 2008 I was high school student, thus I had to be at school from ~8am to 3pm. In 2016 I was at work in those hours and I could freely listen to music.</p>
+                <p>Fig. 5 shows total scrobbles count grouped by hours for weekdays. In 2008, general pattern can be described as: from ~ 7am till 4pm slow and rather stable growth. That is time I supposed to prepare to school, sit at school, come back home and eat dinner. After 4pm there is rapid growth in scrobbles count - finally time for myself. After that, around 5-6pm there is small decrease. That is because I had swimming trainings at those hours at Mondays and Wednesdays. When I am back home, listenings count goes up to reach maximum around 8pm. After that they are going down relatively slowly, till 1am when decrease is getting steeper. What is interesting, in 2008 I have not listened any single track from 4-6am.</p>
+                <p>Weekdays back in 2016 are quite different. I try to be at work around 7am. That is clearly visible, as at that hour there is rapid increase in count of srobbles. Around 10 am there is daily maximum in scrobbles count. Approximately at noon and 1pm there is decrease – time for lunch. After break, counts go up again rapidly to reach almost daily maximum. I leave work between 5-6pm, which can be observed in graph. I start to listen more music again after 9pm. As I am getting up quite early I try to go to sleep at most at 1 am. Again, you can infer that from graph.<img src="static/img/lastfm_fig5.png" class="img-responsive img-rounded center-block" alt="Fig.5"></p>
+
+                <p>Fig. 6 again presents total scrobbles, but this time for weekends. In this case, pattern in 2008 and 2016 is not so different anymore. Actually, from 1am till 12am they are almost identical. That was really surprising! Assuming that scrobbles count can be proxy for indicating me being awake or in sleep (and as I know myself - that is true), it occurs that I did not changed to much during weekends. Still going to sleep and getting up at the same hours – interesting discovery. Numbers differ more throughout rest of the day, in general having more scrobbles in 2008 in general.
+                <img src="static/img/lastfm_fig6.png" class="img-responsive img-rounded center-block" alt="Fig.6"></p>
+
+                <h2 class="section-heading">Conclusions</h2>
+                <p>To sum up, there is a lot of things with regard to my music taste which changed over the years. First of all - I listen to and discover more bands. At the beginning, I thought that it is caused by the fact, that discovering new bands is much easier with Spotify (I created account there somewhere in 2015). After I gave it a second though, I believe that it is not only that. Spotify would prompt me just another Japanese rock/metal band if I would continue to be musically close-minded. Maps with bands origin country and table with tags clearly shows that it is not the case anymore.</p>
+
+                <p>Next thing is that I am getting bored with given song faster. Counts of scrobbles for mostly listened songs in 2016 are magnitudes smaller than in 2008… Also, I have no idea, how I was able to listen to one song 47 time in a row. That song last 4.5 minutes, which gave more than 3.5 hours of listening to the same song.</p>
+
+                <p>When I look at hours during day at which I was listened music to, I tend to believe, that nothing really changed in me. What changed, is external - daily routines during weekdays. Back then I had school, where I was not able to listen music, but now I can do it at work. What is common, is that I was listening to music in all available time. Very similar listening pattern during weekends proofs that.</p>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock body_block %}

@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <p>Motivation for this post was found in the <a href="https://www.theverge.com/2017/6/30/15898386/germany-facebook-hate-speech-law-passed" target="_blank">following</a> article, that in Germany, legislators have passed a law under which Facebook (FB), along with other social-media platforms, will be forced to remove illegal content, including hate speech, within 24 hours, under the threat of huge fines in the case of failure of said removal.</p>
+                <p>The above-mentioned law will push FB to start using algorithms to automatically recognize hate speech within content published by their users. Although it is assumed that FB has previously completed this work accurately and efficiently, I came to the conclusion that it would be interesting to create Machine Learning models for hate speech recognition and deep dive into some Polish FB discussions.</p>
+                <p>I attempt to answer questions like: “How much hate speech there is on “Polish FB”?”, “What are the types of fan pages with bigger amount of hate?”, “What is the type of most popular hate speech?” and “How easy it would be to recognize it in automate manner?”</p>
+
+                <h2 class="section-heading">What is hate speech?</h2>
+                <p>Hate speech is defined as a type of speech, which attacks and denigrates other people. Target of attack can be a single person or a whole group, and the basis it is usually membership to certain social group, race, gender, sexual orientation, religion, physical/mental disabilities, and many others. On an infamous hate speech list you can find, for example, anti-Semitism, islamophobia, christianophobia, racism, chauvinism or just direct aggression towards someone. In many developed countries, hate speech can be penalized with fines and/or imprisonment.</p>
+                <p>It is fair to remember, that although hate speech can be associated with simple and vulgar language, that is not a requirement of hate speech. One can use articulate and poetic language, but if its goal is to harm, offend and spread prejudice – that is still hate speech.</p>
+
+                <h2 class="section-heading">To ban or not to ban?</h2>
+                Although the idea for this post come from a regulation which relates to an ethically controversial topic (censoring hate speech), its moral aspect will not be covered here. In general, albeit majority will agree that hate speech is cruel and worth of punishing, not all will support banning it.  A number of valuable and interesting materials can be found online in that field.<a href="http://freespeechdebate.com/discuss/nineteen-arguments-for-hate-speech-bans-and-against-them/" target="_blank"> This</a> article is a nice start. I will focus on describing and analysing gathered datasets as well as the technical challenges I encountered.
+
+                <h2 class="section-heading">Getting data</h2>
+                <p>As a dataset, posts and comments published on FB were used (excluding replies to comments). All data were downloaded using FB Graph API. API can be accessed via <a href="https://developers.facebook.com/tools/explorer/" target="_blank">UI</a>, or programmatically using any programming language. Documentation can be found<a href="https://developers.facebook.com/docs/graph-api" target="_blank"> here.</a> API was easy to use and without any query limits, which made it easy to get more than enough data very fast.</p>
+                <p>All classification methods used in this project were “supervised”. It means that, for machine learning models to be trained, a labelled dataset was required. That kind of dataset contains samples (comments text) and labels ‘0’ (not-hate speech) or ‘1’ (hate speech). Based on texts and labels – n-dimensional features vector was created and algorithm “learn” how to classify data. After performing an extensive search, I was not able to find any available dataset with Polish texts and hate speech classification. The decision was made to label downloaded data from FB independently.</p>
+
+                <h2 class="section-heading">Labelling data</h2>
+                <p>Posts and comments downloaded from different FB fan pages where randomly shuffled and the labelling exercise was conducted. The goal was to classify at least 20 thousand comments. That number would be sufficient for training and out-of-sample testing purposes. I wanted to assign 0/1 labels along with type of hate speech - for example racism or islamophobia. The latter would be useful for future projects (classifying not only hate speech, but also its type). Unfortunately, after labelling ~4k comments I gave up with the additional type assignment, as it was too time consuming.</p>
+                <p>There were some challenges during classification process. Firstly, there was a moderate amount of subjectivity during assignment. Subjectivity could pose as a dilemma due to the factors considered when making a judgement of what constitutes hate speech. For example, some questions arise such as: when is a comment offensive enough to be treated as hate? Perhaps some comments may not be perceived as offensive to some individuals compared to others and therefore they may be disregarded when deciding on whether it is hate speech. If this is the case, what is the general consensus on hate speech? These were the questions that posed as a challenge during the exercise.</p>
+                <p>Another problem was the lack of context regarding the individual’s comment. Let’s take this comment for example: “This is piece of shit”. If this comment relates to piece of art – it is just unconstructive critique, not a form of hate speech. The situation is completely different if this comment relates to a human being…. Another example emphasises this point: “Amazing! We should make it more often! Love it!”. Sounds good? Yes. As long as you do not see that comment under video showing racism and violence against other people. During the labelling process, context (even if known) was not taken into account and not-hate speech was assumed in certain cases. This means, that both mentioned examples would be labelled as not-hate speech, even though, when given the context, they could be regarded as hate speech.</p>
+
+                <h2 class="section-heading">Dataset</h2>
+                <p>Prepared dataset contains 20100 comments. 16218 (~81%) of comments are classified as non-hate speech and 3882 (~19%) as hate speech. Comments were written between January of 2013 and July 2017. As can be seen from Fig.1, even though oldest data point comes from year 2013, the vast majority of comments are from more recent time. Number of gathered comments start to increase rapidly around June 2017 to achieve average ~70 comments per day at the end of analyzed period.</p>
+                <figure>
+                    <img src="static/img/fb_fig1.png" class="img-responsive img-rounded center-block" alt="Fig.4">
+                </figure>
+                <p>Data were scraped from 9 different FB fan pages. The number of comments from each page vary drastically. The biggest amount of comments (7344) comes from TVN24 which is a fan page of one of most popular commercial informational TV channel in Poland. The smallest amount of data (78) comes from 'Do Rzeczy', which is a fan page of weekly news and political magazine in Poland associated with right-wing political scene. Among sources, one can also find comments from different than ‘News...’ genres, i.e. gossips about celebrities (Pudelek), entertainment websites (Demotywatory, Zdelegalizowac Coaching), or widely understood social movements pages labeled as ‘Community’ (LGBT Polska, Stop islamizacji Europy).</p>
+                <p>Good point to mention is that source page genres were assigned manually. Information taken from ‘About’ section of fan-page are not always suitable. For example, officially – ‘Zdelegalizowac Coaching’ has category 'Health/Beauty', whereas in reality, this is satirize/entertainment page about motivational coaches.</p>
+                <p>As can be seen in Fig.2 and Tab.1, ratios of non-hate/hate speech vary among fan-pages. The least hate speech can be found in entertainment websites (less than 10% of hate speech). News and gossips portals have on average around ~17% of hate speech (which is surprisingly high). In the dataset, there is also one case where there is more hate speech than on average. That doubtfully honored title goes to "Stop islamizacji Europy" which is anti-Islamic and anti-immigration social movement page and has 52% of hate speech content.</p>
+                <figure>
+                    <img src="static/img/fb_fig2.png" class="img-responsive img-rounded center-block" alt="Fig.4">
+                </figure>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.1 Data sources - genres and comments counts.</caption>
+                        <thead>
+                            <tr style="text-align: right;">
+                              <th></th>
+                              <th>fanpage</th>
+                              <th>genre</th>
+                              <th>no_hate(%)</th>
+                              <th>hate(%)</th>
+                              <th>cnt_comments</th>
+                              <th>cnt_no_hate</th>
+                              <th>cnt_hate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th>1</th>
+                              <td>Stop islamizacji Europy</td>
+                              <td>Community</td>
+                              <td>48</td>
+                              <td>52</td>
+                              <td>541</td>
+                              <td>257</td>
+                              <td>284</td>
+                            </tr>
+                            <tr>
+                              <th>3</th>
+                              <td>LGBT Polska</td>
+                              <td>Community</td>
+                              <td>84</td>
+                              <td>16</td>
+                              <td>86</td>
+                              <td>72</td>
+                              <td>14</td>
+                            </tr>
+                            <tr>
+                              <th>2</th>
+                              <td>Demotywatory</td>
+                              <td>Entertainment Website</td>
+                              <td>98</td>
+                              <td>2</td>
+                              <td>120</td>
+                              <td>118</td>
+                              <td>2</td>
+                            </tr>
+                            <tr>
+                              <th>7</th>
+                              <td>Zdelegalizowac Coaching</td>
+                              <td>Entertainment Website</td>
+                              <td>93</td>
+                              <td>7</td>
+                              <td>626</td>
+                              <td>583</td>
+                              <td>43</td>
+                            </tr>
+                            <tr>
+                              <th>6</th>
+                              <td>Pudelek</td>
+                              <td>Gossips</td>
+                              <td>86</td>
+                              <td>14</td>
+                              <td>3167</td>
+                              <td>2710</td>
+                              <td>457</td>
+                            </tr>
+                            <tr>
+                              <th>0</th>
+                              <td>TVN24</td>
+                              <td>News &amp; Media Website</td>
+                              <td>75</td>
+                              <td>25</td>
+                              <td>7344</td>
+                              <td>5481</td>
+                              <td>1863</td>
+                            </tr>
+                            <tr>
+                              <th>4</th>
+                              <td>Pikio.pl</td>
+                              <td>News &amp; Media Website</td>
+                              <td>82</td>
+                              <td>18</td>
+                              <td>3928</td>
+                              <td>3214</td>
+                              <td>714</td>
+                            </tr>
+                            <tr>
+                              <th>5</th>
+                              <td>Gazeta Wyborcza</td>
+                              <td>News &amp; Media Website</td>
+                              <td>88</td>
+                              <td>12</td>
+                              <td>4210</td>
+                              <td>3715</td>
+                              <td>495</td>
+                            </tr>
+                            <tr>
+                              <th>8</th>
+                              <td>Do Rzeczy</td>
+                              <td>News &amp; Media Website</td>
+                              <td>87</td>
+                              <td>13</td>
+                              <td>78</td>
+                              <td>68</td>
+                              <td>10</td>
+                            </tr>
+                          </tbody>
+                    </table>
+                </p>
+                <p>Fig.3 shows normalized number of comments grouped by hour of day. Surprisingly, people become very active since early morning – number of written comments during the day starts to increase rapidly ~4am.</p>
+                <p>Also, the difference in number of comments written during work and after-work hours in not large. This suggests that being at work does not stop individuals following and commenting on FB. Hours in which most comments were written are ~4-6pm. The Least comments were written between 1-4am. There is no clear difference in time-pattern of activity of writing hate and not-hate speech comments.</p>
+                <figure>
+                    <img src="static/img/fb_fig3.png" class="img-responsive img-rounded center-block" alt="Fig.4">
+                </figure>
+
+                <h2 class="section-heading">Words</h2>
+                <p>The Average number of words in single comment is 16, with standard deviation (std) of 26. That value is almost the same for both - hate (mean:18, std:25) and not-hate (mean:16, std:26) speech. The Small difference in word counts may be explained by significant difference in number of comments within classes. Both sets contain some outliers with hundreds of words. Effect on mean value of those exceptionally long comments is mitigated more within bigger dataset.</p>
+                <p>Tab.2 shows the 15 most popular words occurring in comments divided by class membership. To derive that list, so called “stop-words”, i.e. most popular words in given language with no useful information for classification purposes, were removed.  As it turned out later, even with excluded stop-words, a lot of most common words in both classes overlapped. To get better list of words specific only to given class, one hundred most frequent words which occurs in both groups, where added to list of stop-words. After visual inspection, list of stop-words was extended even further. With extended list of stop-words, frequency distribution of words in classes were recalculated.</p>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                            <caption>Tab.2 - 15 most common words in classes</caption>
+                            <tr>
+                                <th colspan="1" style="text-align:center;"></th> 
+                                <th colspan="3" style="text-align:center;">Not-hate speech</th> 
+                                <th colspan="3" style="text-align:center;">Hate speech</th> 
+                            </tr>
+                            <tr> 
+                                <th>#</td> <th>Word (Polish)</td> <th>Word (English)</td> <th>No. of occ.</td> 
+                                <th>Word (Polish)</td> <th>Word (English)</td> <th>No. of occ.</td> 
+                            </tr>
+                            <tr>
+                                <td>1</td> <td>super</td> <td>super</td> <td>147</td>
+                                <td>debil</td> <td>idiot/moron (but stronger)</td> <td>68</td>
+                            </tr>
+                            <tr>
+                                <td>2</td> <td>panie</td> <td>ladies</td> <td>131</td>
+                                <td>kurwa</td> <td>fuck/bitch</td> <td>54</td>
+                            </tr>
+                            <tr>
+                                <td>3</td> <td>kobieta</td> <td>woman</td> <td>122</td>
+                                <td>idiota</td> <td>idiot</td> <td>49</td>
+                            </tr>
+                            <tr>
+                                <td>4</td> <td>wiadomo</td> <td>It is known</td> <td>117</td>
+                                <td>debile</td> <td>plural of “debil”</td> <td>46</td>
+                            </tr>
+                            <tr>
+                                <td>5</td> <td>prawda</td> <td>truth</td> <td>112</td>
+                                <td>kara</td> <td>punishment</td> <td>45</td>
+                            </tr>
+                            <tr>
+                                <td>6</td> <td>dobra</td> <td>good</td> <td>104</td>
+                                <td>banda</td> <td>gang/pack</td> <td>41</td>
+                            </tr>
+                            <tr>
+                                <td>7</td> <td>mówi</td> <td>says</td> <td>97</td>
+                                <td>idioci</td> <td>plural of “idiota”</td> <td>37</td>
+                            </tr>
+                            <tr>
+                                <td>8</td> <td>życie</td> <td>life</td> <td>95</td>
+                                <td>jesteś</td> <td>you are</td> <td>36</td>
+                            </tr>
+                            <tr>
+                                <td>9</td> <td>kogo</td> <td>whom</td> <td>94</td>
+                                <td>europy</td> <td>Europe’s</td> <td>35</td>
+                            </tr>
+                            <tr>
+                                <td>10</td> <td>naprawdę</td> <td>really</td> <td>93</td>
+                                <td>śmierci</td> <td>death</td> <td>33</td>
+                            </tr>
+                            <tr>
+                                <td>11</td> <td>osób</td> <td>persons/people</td> <td>93</td>
+                                <td>innaczej</td> <td>otherwise</td> <td>30</td>
+                            </tr>
+                            <tr>
+                                <td>12</td> <td>rząd</td> <td>government</td> <td>92</td>
+                                <td>same</td> <td>only</td> <td>28</td>
+                            </tr>
+                            <tr>
+                                <td>13</td> <td>rozumiem</td> <td>government</td> <td>89</td>
+                                <td>chory</td> <td>sick</td> <td>28</td>
+                            </tr>
+                            <tr>
+                                <td>14</td> <td>trochę</td> <td>a little bit</td> <td>88</td>
+                                <td>Islam</td> <td>Islam</td> <td>26</td>
+                            </tr>
+                            <tr>
+                                <td>15</td> <td>problem</td> <td>problem</td> <td>84</td>
+                                <td>słów</td> <td>words</td> <td>26</td>
+                            </tr>
+                        </table>
+                </p>
+                <p>Sentiments of words in non-hate speech group are mainly neutral, whereas in hate-speech - they are primarily negative. That looks correct, as distinction is being made between hate-speech and all the rest (in contrast to positive vs. negative sentiment comparison).</p>
+
+                <h2 class="section-heading">Initial results</h2>
+                <p>For the initial iteration multiple models were tested. Results are present in Tab.3. As can be seen, all ML models except GaussianNB, have an overall accuracy higher than 80%. However, Good overall accuracy score can be misleading. As majority (~81%) of comments come from non-hate speech class, achieving accuracy close to 80% is as trivial as labeling everything as not-hate speech. In case of that (relatively) imbalanced dataset, it is better to take a look on different results metrics, for example recall, precision or F1 score.</p>
+                <p>Recall (also called true positive rate), is a fraction of classified relevant instances over total relevant instances. For this analysis, it means: ratio of discovered hate speech. Precision (also called positive predictive value), determines ratio of positive predicted values which are actually positive. For this analysis, it is ratio of correctly classified hate speech over all comments classified as hate speech. F1 score can be treated as (harmonic) mean of precision and recall.</p>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.3 Initial models reults metrics.</caption>
+                        <thead>
+                            <tr style="text-align: right;">
+                              <th></th>
+                              <th>AdaBoost</th>
+                              <th>Bagging</th>
+                              <th>GaussianNB</th>
+                              <th>LinearSVC</th>
+                              <th>LogReg</th>
+                              <th>MLP</th>
+                              <th>RandomForest</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th>acc_score</th>
+                              <td>0.815423</td>
+                              <td>0.829851</td>
+                              <td>0.580597</td>
+                              <td>0.846020</td>
+                              <td>0.822388</td>
+                              <td>0.813184</td>
+                              <td>0.839055</td>
+                            </tr>
+                            <tr>
+                              <th>f1_score</th>
+                              <td>0.135198</td>
+                              <td>0.442088</td>
+                              <td>0.319063</td>
+                              <td>0.464069</td>
+                              <td>0.199552</td>
+                              <td>0.470754</td>
+                              <td>0.414480</td>
+                            </tr>
+                            <tr>
+                              <th>precision</th>
+                              <td>0.816901</td>
+                              <td>0.617312</td>
+                              <td>0.233866</td>
+                              <td>0.728261</td>
+                              <td>0.847619</td>
+                              <td>0.528481</td>
+                              <td>0.720126</td>
+                            </tr>
+                            <tr>
+                              <th>recall</th>
+                              <td>0.073698</td>
+                              <td>0.344346</td>
+                              <td>0.501906</td>
+                              <td>0.340534</td>
+                              <td>0.113088</td>
+                              <td>0.424396</td>
+                              <td>0.290978</td>
+                            </tr>
+                          </tbody>
+                    </table>
+                </p>
+                <p>When additional metrics are taken into account, the results do not look satisfying anymore. The best recall score was obtained for GaussianNB - that model was able to discover half of hate speech in test sample. Despite good recall (compared to other models), precision was really low - only ~20% of classified hate speech was actually hate speech. Best precision (~85%) was obtained using LogisticRegression, but in that case, recall is embarrassingly low - only ~10% of hate speech was discovered. Overall, for initial results, MLPClassifier done best. With F1 score equal to 47%, it was able to discover 42% actual hate speech with precision of 53%. Second best performing model was LinearSVC, with 10% smaller recall, though 72% accuracy.</p>
+
+                <h2 class="section-heading">Balancing dataset to improve results</h2>
+                <p>During initial tests, it was discovered that due to a relatively imbalanced dataset (80/20), the algorithms tended to favor the majority class. To cope with that, ML community come up with some solutions. The main approaches to deal with that problem are:
+                    <ul>
+                        <li>Get more data (that is always the case)</li>
+                        <li>Resample dataset (over/under sampling)</li>
+                        <li>Use cost sensitive classifiers (those models can penalize more not discovering relevant class instances)</li>
+                        <li>Use one class learning (like in case of objects recognition or anomaly</li>
+                    </ul>
+                </p>
+                <p>Within those main categories, different variations can be used. For example, a dataset can be resampled by randomly reducing majority class, or by multiplying minority class. Also, more approaches can be combined, like under-sample majority, over-sample minority and additional usage of cost sensitive models.</p>
+                <p>In this analysis, two resampling approaches were used. In the first scenario, the majority class in dataset was randomly reduced. In second scenario, SMOTE + Tomek links technique was used. Latter approach under-sample majority class using noise reduction with Tomek links and over-sample minority class by creating synthetic class instances with SMOTE technique.</p>
+
+                <h2 class="section-heading">Random under-sampling majority class</h2>
+                <p>Procedure to under-sample non-hate speech class was run. Number of data points after resampling was: 8444, from which, 54% of comments were not-hate speech. The same (as in initial trials) set of ML models were trained and evaluated. Results are presented in Tab.4.</p>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.4 Reults metrics after random undersampling of majority class.</caption>
+                        <thead>
+                            <tr style="text-align: right;">
+                              <th></th>
+                              <th>AdaBoost</th>
+                              <th>Bagging</th>
+                              <th>GaussianNB</th>
+                              <th>LinearSVC</th>
+                              <th>LogReg</th>
+                              <th>MLP</th>
+                              <th>RandomForest</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th>acc_score</th>
+                              <td>0.644168</td>
+                              <td>0.705151</td>
+                              <td>0.599171</td>
+                              <td>0.695678</td>
+                              <td>0.715808</td>
+                              <td>0.697454</td>
+                              <td>0.711664</td>
+                            </tr>
+                            <tr>
+                              <th>f1_score</th>
+                              <td>0.335912</td>
+                              <td>0.605388</td>
+                              <td>0.611589</td>
+                              <td>0.670935</td>
+                              <td>0.617225</td>
+                              <td>0.641906</td>
+                              <td>0.590412</td>
+                            </tr>
+                            <tr>
+                              <th>precision</th>
+                              <td>0.878613</td>
+                              <td>0.720755</td>
+                              <td>0.527201</td>
+                              <td>0.631325</td>
+                              <td>0.741379</td>
+                              <td>0.658993</td>
+                              <td>0.768053</td>
+                            </tr>
+                            <tr>
+                              <th>recall</th>
+                              <td>0.207650</td>
+                              <td>0.521858</td>
+                              <td>0.728142</td>
+                              <td>0.715847</td>
+                              <td>0.528689</td>
+                              <td>0.625683</td>
+                              <td>0.479508</td>
+                            </tr>
+                          </tbody>
+                    </table>
+                </p>
+                <p>As can be noticed, results after random under-sampling of majority class are better. Precisions and recalls are ~20% higher for most models. The best result was achieved by LinearSVC, with F1 score of 67%. That result is 20% better than best result from not resampled dataset. LinearSVS model was able to discover 72% of all hate speech within test set. At the same time, ~63% of all classified hate speech was actually hate speech.</p>
+
+                <h2 class="section-heading">SMOTE + Tomek links approach</h2>
+                <p>Tab.5 shows results for models trained on resampled dataset using SMOTE for oversampling minority group and Tomek links for under-sampling majority. Although results are on average ~8% better than initial ones, they underperform those from random under-sampling. The reason behind it may be the way method was implemented. As Smote+Tomek expected dense features vector (not comments in string form), samples had to be first vectorised (which outputs sparse vector) and then converted to its dense representation. Only after that, Smote+Tomek could be used. Fact that non-raw data, but its transformed representation was resampled, might actually impact learning results.</p>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.5 Reults metrics after under/over sampling with SMOTE+Tomek links.</caption>
+                        <thead>
+                            <tr style="text-align: right;">
+                              <th></th>
+                              <th>AdaBoost</th>
+                              <th>Bagging</th>
+                              <th>GaussianNB</th>
+                              <th>LinearSVC</th>
+                              <th>LogReg</th>
+                              <th>MLP</th>
+                              <th>RandomForest</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th>acc_score</th>
+                              <td>0.820149</td>
+                              <td>0.828109</td>
+                              <td>0.586816</td>
+                              <td>0.687811</td>
+                              <td>0.738557</td>
+                              <td>0.755224</td>
+                              <td>0.835821</td>
+                            </tr>
+                            <tr>
+                              <th>f1_score</th>
+                              <td>0.274824</td>
+                              <td>0.521137</td>
+                              <td>0.321210</td>
+                              <td>0.428766</td>
+                              <td>0.465684</td>
+                              <td>0.473797</td>
+                              <td>0.506726</td>
+                            </tr>
+                            <tr>
+                              <th>precision</th>
+                              <td>0.652381</td>
+                              <td>0.573171</td>
+                              <td>0.236747</td>
+                              <td>0.334043</td>
+                              <td>0.388136</td>
+                              <td>0.409049</td>
+                              <td>0.615245</td>
+                            </tr>
+                            <tr>
+                              <th>recall</th>
+                              <td>0.174079</td>
+                              <td>0.477764</td>
+                              <td>0.499365</td>
+                              <td>0.598475</td>
+                              <td>0.581957</td>
+                              <td>0.562897</td>
+                              <td>0.430750</td>
+                            </tr>
+                          </tbody>
+                    </table>
+                </p>
+
+                <h2 class="section-heading">Word vectors and fastText</h2>
+                <p>In order to improve classification results more, further work was conducted. There are some well-known challenges with classification of short text messages. First, most obvious problem, is that short messages are... short. As can been seen in the first part of this analysis, the average length of a comment is ~17 words. Such a short messages results in very sparse and highly dimensional feature vector with little of effective information. It is problematic for algorithms to extract key features for training in such conditions.</p>
+                <p>To make the matter worse, those short comments contain a lot of typos and orthographic mistakes. Human beings can easily spot, that "original" and "oryginal" is actually same word, but with error. For algorithms though, those are two completely different words. Typos and errors have negative impact on classification. Not only do they create new dimensions in features vector, but they also lower occurrence frequency of words correct representations.</p>
+                <p>One way of dealing with the mentioned problems is to use so called word vectors. To create those vectors, massive amount of unlabelled text is fetched to algorithm. Using different statistics of words and their embedding, each word is defined as a vector in N-dimensional space. This solution has a great advantage. Words with similar meanings are close to each other within that space which helps the algorithm to capture different degrees of similarity between words.</p>
+                <p>In the next part of analysis, pre-trained word vectors published by FB were used. As a part of a highly acclaimed project called fastText, FB researchers published pre-trained word vectors with 300 dimensions in 294 languages. Data from which those word vectors were generated, comes from Wikipidia dumps. Vectors can be found on <a href="https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md" target="_blank">this</a> github page, and more information about that amazing project can be checked <a href="https://arxiv.org/abs/1607.04606" target="_blank">here</a> and <a href="https://arxiv.org/abs/1607.01759" target="_blank">here</a>.
+
+                <h2 class="section-heading">Using word vectors to improve results</h2>
+                <p>In training, randomly under-sampled data were used. Features vector was created as follows:
+                    <ul>
+                        <li>Using pre-trained fastText word vectors, dictionary with words and their vector representation was created</li>
+                        <li>For each word in every comment, vector for given word was obtained </li>
+                        <li>Vector of zeros was assigned for words which did not exists in dictionary</li>
+                        <li>From each comment, one single vector was calculated as an average of vectors of each word</li>
+                        <li>Features vector using TfidfVectorizer was created</li>
+                        <li>Mean word vectors and Tfidf features vectors were concatenated</li>
+                    </ul>
+                In resulting features vector, number of rows was equal to number of comments, and number of columns was 300 dimensions from vectors plus features from Tfidf.</p>
+                <p>Tab.6 presents results for models trained using word vectors and Tfidf. Small positive difference compared to random under-sampling method can be observed. Best performing model was still LinearSVC, with F1 score equal to ~69%. That is 2% better than previous best result. From all models, only one - AdaBoostClassifier, shows major improvement. Previously, its best F1 score was 34%, whereas by using word vectors method, F1 achieved 58%.</p>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.6 Reults metrics models trained on word vectors and Tfidf.</caption>
+                        <thead>
+                            <tr style="text-align: right;">
+                              <th></th>
+                              <th>AdaBoost</th>
+                              <th>Bagging</th>
+                              <th>GaussianNB</th>
+                              <th>LinearSVC</th>
+                              <th>LogReg</th>
+                              <th>MLP</th>
+                              <th>RandomForest</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <th>acc_score</th>
+                              <td>0.660154</td>
+                              <td>0.647721</td>
+                              <td>0.597395</td>
+                              <td>0.710480</td>
+                              <td>0.732978</td>
+                              <td>0.701599</td>
+                              <td>0.647721</td>
+                            </tr>
+                            <tr>
+                              <th>f1_score</th>
+                              <td>0.578561</td>
+                              <td>0.528152</td>
+                              <td>0.608746</td>
+                              <td>0.688733</td>
+                              <td>0.672951</td>
+                              <td>0.651934</td>
+                              <td>0.513491</td>
+                            </tr>
+                            <tr>
+                              <th>precision</th>
+                              <td>0.625397</td>
+                              <td>0.629490</td>
+                              <td>0.525845</td>
+                              <td>0.644815</td>
+                              <td>0.717156</td>
+                              <td>0.659218</td>
+                              <td>0.639511</td>
+                            </tr>
+                            <tr>
+                              <th>recall</th>
+                              <td>0.538251</td>
+                              <td>0.454918</td>
+                              <td>0.722678</td>
+                              <td>0.739071</td>
+                              <td>0.633880</td>
+                              <td>0.644809</td>
+                              <td>0.428962</td>
+                            </tr>
+                          </tbody>
+                    </table>
+                </p>
+                <p>The reason for relatively small results improvement may lie the fact that word vectors were pre-trained on Polish Wikipedia dump. Language used on Wikipedia is more official and far more correct than FB comments as it does not contain a high number of typos and errors in comparison to FB comments. Also, on Wikipedia, there are less slang and vulgar expressions as compared to on casual FB comments. It is perhaps reasonable to suggest, that a better approach would be to train word vectors using millions of unlabeled FB comments instead of using pre-trained ones. Word vectors created in that way would represent analyzed dataset better.</p>
+
+                <h2 class="section-heading">Results summary</h2>
+                <p>To summarize, the best performing model was LinearSVC. To train data, randomly under-sampled dataset was used. Features were generated using pre-trained word vectors from Facebook's fastText project. Tfidf features were also used. Achieved F1 score (69%) is satisfactory. The model was able to detect 74% hate speech in out-of-sample data. At the same time, 64% of all comments classified as hate speech, actually were hate speech. Future works to improve that model should consist of training word vectors on a more suitable dataset - ideally on a massive Facebook’s comments dump in Polish colloquial language. That would allow word vectors to be more robust against incorrect writing and slang expressions.</p>
+
+                <h2 class="section-heading">Final words</h2>
+                <p>Finally, I would like to tackle more directly the questions I have asked in the beginning of
+                this analysis. In the tested sample above, every 5th comment is some form of hate, which suggests that there is a large amount of hate speech existing on FB. From data that has been examined, the news and community/social fan pages drown in hate most. That observation is not far away from intuition I had before starting to work on that project.</p>
+                <p>Despite not being able to present an exact number of hate speech, from the experience gathered while manually labelling 20k comments, I can infer that categories of hate repeated very often are those related with religions (Islam and Christianity), politics, immigration and hatred in response of crime/violence.</p>
+                <p>From a technical perspective, although the problem presented in this post is in essence a well-known binary classification problem, I encountered some interesting challenges. This included: having a relatively imbalanced dataset and comments being of a very short text length. Overall, it was very interesting exercise and I am happy with achieved results.</p>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock body_block %}

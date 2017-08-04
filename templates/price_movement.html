@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <p>Traditionally, there have been three major approaches in trading – fundamental/technical analysis and passive investing. Fundamental analysis emphasises relationship between supply and demand. Investor ought to focus on analysing company’s financial statements, their products and strategic position in the market etc. Technical analytics claims that market’s price reflects everything investor should know, so there is no point in investigation company’s insights. Graphs with prices and fancy indicators is all one need. Passive investor on the other side believes that no analysis can “beat the market” and the only thing which has sense is investing in diversified portfolios.</p>
+                <p>Recently, new type of approach has become more and more popular – algorithmic trading. In that approach, one takes various datasets, like fundamentals, technical indicators or market’s sentiments, and put those into mathematical, financial and/or data analytics algorithms to get the best insights. Within this approach, diversity of data one can use is huge. It is not only about data from financial statements composed with pricing information from charts. As nicely pointed out in for example <a href="https://www.quantstart.com/articles/Deep-Learning-with-Theano-Part-1-Logistic-Regression" target="_blank">that</a> article, sources which were not utilized before, like satellite data, can come in handy too. Counting cars from satellite imagery on retail store parking is nice usage example.</p>
+                <p>In this post I will create and evaluate Decision Tree model to predict direction of next 14 days’ price movement. Task is quite ambitious and according to <a href="https://books.google.co.uk/books/about/Trade_Your_Way_to_Financial_Freedom.html?id=yL_KIOTy3uYC" target="_blank">Van K. Tharp</a>, accuracy ~55% can be expected.</p>
+
+            	<h2 class="section-heading">Will price go up or down? </h2>
+                <p>Let’s simplify trading game to one question – will closing price be higher or lower in future than today? Theoretically, if you know that, you would be able to act accordingly to your prediction and buy when you know it will go up or sell if it goes down. That way you can make profits.</p>
+                <p>To answer above mentioned question, decision tree model and historical pricing data were used for companies which are part of WIG20 - stock market index of the twenty largest companies on Warsaw Stock Exchange. Unfortunately, those data are not part of Yahoo Finance API, so they had to be scraped from one of popular polish trading website. Some clues how it was achieved can be found in <a href="http://slawomirtulski.com/more_than" target="_blank">previous post.</a></p>
+
+                <h2 class="section-heading">Be afraid of the future…</h2>
+                <p>One of the trap, which one can easily fall into, is using data which would not be available in real life. One could build 100% accurate model of future price movement, if he or she use future price as a feature… </p>
+                <p>Although it seems obvious to spot with respect to closing price of given day, it became trickier once one start to use for example low or high price. In reality, one is not able to define those price points until given session is closed.</p>
+                <p>Rule, that if something is too good, it is probably not the truth, is more than valid here. If one is getting too optimistic results, then “seeing the future error” is highly possible.</p>
+
+                <h2 class="section-heading">Features</h2>
+                <p>For each company, all available historical data has been used. For each day following features were calculated:
+                    <ol>
+                        <li>close prices from 20 previous days</li>
+                        <li>24-day simple moving average of close price</li>
+                        <li>50-day simple moving average of close price</li>
+                        <li>7-day average plus/minus directional movement indices</li>
+                        <li>7-day average directional index (ADX)</li>
+                        <li>Price to earnings ratio (P/E Ratio)</li>
+                        <li>On balance volume (OBV)</li>
+                    </ol>
+                </p>
+
+                <p><b>Ad.1</b> Each day from those 20 days were treated as separate feature</p>
+                <p><b>Ad.2 and 3</b> Simple moving averages from 34 and 50 previous closing prices.</p>
+                <p><b>Ad.4</b> Two indicators: plus (+DM) and minus (-DM) directional movement, which use differences in today’s and yesterday’s highest and lowest price in calculation. Formula can be found <a href="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:average_true_range_atr" target="_blank">here</a>. First, indicators where calculated for each day, then simple moving average was obtained.</p>
+                <p><b>Ad.5</b> Formula can be found <a href="http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:average_directional_index_adx" target="_blank">here</a>.</p>
+                <p><b>Ad.6</b><a href="< http://www.investopedia.com/ask/answers/070314/how-do-i-calculate-pe-ratio-company.asp>" target="_blank"> Formula</a>. Very popular fundamental indicator.</p>
+                <p><b>Ad.7</b> This feature is using volume data as explained <a href="http://www.investopedia.com/terms/o/onbalancevolume.asp" target="_blank">here</a>.</p>
+
+                <h2 class="section-heading">Fitting model</h2>
+                <p>Data has been split in half into training and test set. Chronological order has been remained, so that training was done on older data points. As a model, Python’s <code>sklearn.tree.DecisionTreeClassifier</code> was used. After extensive model parameters testing, max leaf nodes were set to 10, along with max tree depth of 9. </p>
+                <p>Overall, obtained mean accuracy score was 0.5439 along with standard deviation of 0.0462. In table below, scores for test sets for each company are presented:
+                    <table style="width:100%">
+                        <tr> <th>Company symbol</th> <th>Accuracy Score</th> </tr>
+                        <tr> <td>ALIOR</td> <td>0.634</td> </tr>
+                        <tr> <td>ASSECOPOL</td> <td>0.542</td> </tr>
+                        <tr> <td>BZWBK</td> <td>0.574</td> </tr>
+                        <tr> <td>CCC</td> <td>0.536</td> </tr>
+                        <tr> <td>CYFRPLSAT</td> <td>0.423</td> </tr>
+                        <tr> <td>ENEA</td> <td>0.465</td> </tr>
+                        <tr> <td>ENERGA</td> <td>0.618</td> </tr>
+                        <tr> <td>EUROCASH</td> <td>0.532</td> </tr>
+                        <tr> <td>KGHM</td> <td>0.532</td> </tr>
+                        <tr> <td>LOTOS</td> <td>0.584</td> </tr>
+                        <tr> <td>LPP</td> <td>0.541</td> </tr>
+                        <tr> <td>MBANK</td> <td>0.528</td> </tr>
+                        <tr> <td>ORANGEPL</td> <td>0.524</td> </tr>
+                        <tr> <td>PEKAO</td> <td>0.542</td> </tr>
+                        <tr> <td>PGE</td> <td>0.558</td> </tr>
+                        <tr> <td>PGNIG</td> <td>0.525</td> </tr>
+                        <tr> <td>PKNORLEN</td> <td>0.562</td> </tr>
+                        <tr> <td>PKOBP</td> <td>0.507</td> </tr>
+                        <tr> <td>PZU</td> <td>0.592</td> </tr>
+                        <tr> <td>TAURONPE</td> <td>0.558</td> </tr>
+                    </table>
+                </p>
+
+                <h2 class="section-heading">Is it better than random? </h2>
+                <p>Without any modeling, one is able to achieve 50% accuracy using just random guesses. With that in mind, created model has to have accuracy higher than that to be valuable. To assure that obtained accuracy of 54% within given sample meet that criteria, statistical hypothesis was created and tested.</p>
+                <p>Assuming that resulting accuracy score follows normal distribution, one can define null hypothesis (H0) that mean value of that distribution is less than or equal to 0.50. That can be interpreted as “model is as good as random or worse”. In case of rejection of H0, alternative hypothesis (H1) would be supported, meaning that model is performing better than random choices. That can be written more formally as:
+                <pre>    H0: &mu; &le; 0.50 
+    H1: &mu; > 0.50</pre></p>
+                <p>Given size of sample, test statistic has form of: <code>t = ((X - &mu;)/S) * sqrt(n -1)</code>, where:
+                X is mean from sample (0.54385), S is standard deviation from sample (0.04622) and n is sample size (20). After plugging values into formula, obtained test statistics is 4.135.</p>
+                <p>To define critical region, t-student distribution should be used, as standard deviation is estimated from sample. Using tables of t-distribution with 19 degree of freedom and 0.05 significance level critical values is 1.7291. That gives critical region: <code><1.17291; inf)</code>. As calculated test statistics falls into critical region, H0 can be rejected. It means that one should accept H1 - model performs better than random guess.</p>
+                <p>Value 0.54 is an estimate, so it is valuable to obtain also its confidence interval (with same  as previously). It can be expressed as: &mu; +- SE, where SE is standard error calculated as: <code>SE = critical_value * S/sqrt(n)</code>. After plugging values into formulas confidence interval for model accuracy is: 0.5439 +- 0.012.</p>
+
+                <h2 class="section-heading">Conclusions</h2>
+                <p>It was possible to find model for predicting stock price movement in next 14 days. Model performs better than than random guess, although achieved accuracy is not stunning. </p>
+                <p>One can argue that reasons for moderately accurate results could be found in semi-strong efficient market theory. Theory implies that market is efficient as all public information are given, however, because of various imperfections, there could be still some opportunities found. More about it can be found <a href="http://www.investopedia.com/terms/s/semistrongform.asp" target="_blank">here</a>.</p>
+                <p>Regardless of the fact if theory is true or not, there is still a lot of room for improvements in given model. Firstly, one can plug more data – market sentiment metrics are great candidate for that. Secondly, machine learning algorithms which deals with non-stationarity could be used. In presented model, fact that stock price behavior is not stationary was completely omitted.</p>
+                <p>To sum up, I believe that there is great potential in usage of machne learning in trading. It is great candidate for replacement of old and very often subjective methods of price prediction. And what is more, price prediction is just one usage in that filed…</p>
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock body_block %}

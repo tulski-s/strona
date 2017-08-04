@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <p>In my current company, our goal is to have central data storage repository, where data from multiple sources (internal and external) is extracted and dumped, in as row format as it can. 
+                Data there, is considered as a source of truth and can exist in multiple forms - structured, semi-structured or unstructured. This is concept of so called “Data Lake” (DL). 
+                From DL, data can flow into multiple directions, but the main one is Data Warehouse (DWH). There, data is exposed in its final dimensional form to end user. 
+                In the middle of journey from raw data in DL into dimensions in DWH, multiple preparations and transformations are required. This is presented schematically on Fig.1.</p>
+                <figure>
+                    <figcaption style="font-style: italic; font-size: smaller; font-weight: bold;">Fig. 1 – Generic data flow.</figcaption>
+                    <img src="static/img/hive_red_fig1.png" class="img-responsive img-rounded center-block" alt="Fig.4">
+                </figure>
+
+                <p>In our case, Data Lake is <a href="https://aws.amazon.com/s3/" target="_blank">Amazon S3</a> and DWH is <a href="https://aws.amazon.com/redshift/" target="_blank">Amazon Redshift</a>. There is one missing element though – transformations part. 
+                We considered two technologies as candidates for that role – <a href="http://hadoop.apache.org/" target="_blank">Hadoop</a>/<a href="https://hive.apache.org/" target="_blank">Hive</a> and Redshift. Also, two data-flow scenarios were possible, according to choice of tool. 
+                In current post, I will describe tests we conducted to asses Hadoop/Hive and Redshift stacks as our 
+                toolkit for transforming data into DWH friendly form.</p>
+
+
+
+                <h2 class="section-heading">Transformations with Hive (ETL) </h2>
+                <p>In first scenario Hadoop framework is used, along with Hive to provide SQL-like interface.
+                 Data extracted from source systems would be transformed using Hive scripts and outputted back into
+                DL in its DWH user facing-form. From there, it would be simply loaded into Redshift. No
+                transformation is taking place on DWH side. That is shown on Fig.2.</p>
+                <figure>
+                    <figcaption style="font-style: italic; font-size: smaller; font-weight: bold;">Fig. 2 – ETL with Hadoop/Hive.</figcaption>
+                    <img src="static/img/hive_red_fig2.png" class="img-responsive img-rounded center-block" alt="Fig.4">
+                </figure>
+                <p>Advantages:
+                    <ul>
+                        <li>No need to maintain any staging area tables/schemas within Redshift.</li>
+                        <li>Possibility to spin EMR cluster (preconfigured Hadoop environment on AWS) on demand, with multiple very cheap machines (so called “Spot Instances”) to do all computational intense transformations and shut down clusters after ETL is finished.</li>
+                        <li>Easy scalability in both directions (up/down).</li>
+                        <li>Costs (with all heavy work on Hadoop side, we could have more modest Redshift cluster).</li>
+                    </ul>
+                </p>
+                <p>It should be noted though, that one advantage of that solution, which is spinning up/down EMR
+                cluster on demand, would loose on importance in case of multiple ETLs during day (e.g. done in
+                 hourly manner). In that situation, EMR cluster would be simply up all the time.</p>
+
+
+                <h2 class="section-heading">Transformations within Redshift (ELT) </h2>
+                <p>In second scenario, necessary data from DL would be loaded into staging area in Redshift. 
+                There, tables would be transformed using standard SQL scripts into final dimensional from. 
+                That is presented in Fig.3.</p>
+                <figure>
+                    <figcaption style="font-style: italic; font-size: smaller; font-weight: bold;">Fig.3 – ELT process with transformations done in Redshift.</figcaption>
+                    <img src="static/img/hive_red_fig3.png" class="img-responsive img-rounded center-block" alt="Fig.4">
+                </figure>
+                <p>Advantages:
+                    <ul>
+                        <li>Redshift uses standard SQL, optimized for all relational operations, like joins and advanced inner queries, which are harder to express in map-reduce framework.</li>
+                        <li>More popular technical skills needed. It’s easier to find engineers familiar with more standard database technology like Redshift.</li>
+                        <li>Scaling and parallelism.</li>
+                    </ul>
+                </p>
+
+
+                <h2 class="section-heading">Evaluation, test data and queries </h2>
+                <p>For evaluation, two main features were taken into account – performance and ease of development.
+                 Test were conducted on same data sets from one of our source system. Altogether 280GB of data were
+                used. There were 8 small tables (< 1000 rows), 3 big ones (~14, ~140 and 300 millions) and 1 huge
+                (~3 billion rows).</p>
+                <p>Three queries which supposed to simulate “normal day” tasks were written and executed against those tables. Description of those queries can be found in Tab.1.
+
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.1 – Test queries and their description.</caption>
+                        <tr> 
+                            <th>Symbol</th> 
+                            <th>Description</th> 
+                        </tr>
+                        <tr>
+                            <td>No.1</td>
+                            <td>It was selection from 14 M rows table along with 6 inner joins on small tables.</td>
+                        </tr>
+                        <tr>
+                            <td>No.1_10x</td>
+                            <td>Same as above, although with big table 10 times bigger.</td>
+                        </tr>
+                        <tr>
+                            <td>No.2</td>
+                            <td>It was selection and join on 2 big (14 and 300 millions) tables. Additional difficulty was, that join was non-equal. It matched records from those tables based on closest occurrence of timestamp.</td>
+                        </tr>
+                        <tr>
+                            <td>No.2_10x</td>
+                            <td>Same as above, although with 10 times bigger table.</td>
+                        </tr>
+                        <tr>
+                            <td>No.3</td>
+                            <td>It was update statement on 14M table with rows from one small table.</td>
+                        </tr>
+                    </table>
+                </p>
+
+
+                <h2 class="section-heading">Hardware </h2>
+                <p>For Hive/Hadoop we used three configurations of clusters. As a base for all of them, 1 master
+                and 2 cores were used. All of those machines were m4.xlarge instances with 8 vCPUs, 16 GiB memory,
+                 EBS only storage and 32 GiB  EBS Storage. In first configuration, only base instances were used.
+                In second configuration, 10 m3.xlarge slave instances with 8 vCPUs, 15 GiB memory and 80 SSD GB
+                storage were added. In last configuration another 10 (20 altogether) slaves were added.</p>
+                <p>For Redshift, 3 nodes (dc1.large) cluster with 2 vCPU, 15 GiB memory and 0.16TB SSD storage, where used.</p>
+
+
+                <h2 class="section-heading">Results </h2>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.2 - No.1 results.</caption>
+                        <tr> 
+                            <th>Configuration</th> 
+                            <th>Time (sec)</th> 
+                        </tr>
+                        <tr><td>Hadoop/Hive</td> <td>599</td></tr>
+                        <tr><td>Hadoop/Hive + 10 slaves</td> <td>261</td></tr>
+                        <tr><td>Hadoop/Hive + 20 slaves</td> <td>226</td></tr>
+                        <tr><td>Redshift</td> <td>599</td></tr>
+                    </table>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.3 – No.1_10x results</caption>
+                        <tr> 
+                            <th>Configuration</th> 
+                            <th>Time (sec)</th> 
+                        </tr>
+                        <tr><td>Hadoop/Hive</td> <td>4342</td></tr>
+                        <tr><td>Hadoop/Hive + 10 slaves</td> <td>1593</td></tr>
+                        <tr><td>Hadoop/Hive + 20 slaves</td> <td>1400</td></tr>
+                        <tr><td>Redshift</td> <td>94</td></tr>
+                    </table>
+                </p>
+                <p>As can be seen in Tab.1 and Tab.2, Redshift was significantly faster than all Hadoop configurations for query No.1 and No.1_10x.</p>
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.4 - No.2 and No.2_10x results.</caption>
+                        <tr> 
+                            <th>Configuration</th> 
+                            <th>Time (min)</th> 
+                            <th>Time (min)</th> 
+                        </tr>
+                        <tr><td>Hadoop/Hive</td> <td>15</td> <td>171</td></tr>
+                    </table>
+                </p>
+
+                <p>As can be seen from Tab.4, there is no results for Hive/Hadoop. The reason for that is fact, that query was failing after 1h with Java Heap Memory Error. 
+                After debugging, we discovered that error was due to “skewed data” and execution plan. 
+                Basically, query was running fine until last reducer task. 
+                On that task, reducer was receiving huge amount of multiple version of same keys from mappers which causes memory issues. 
+                Adding more machines in that case is not a solution, as query plan was still passing all the data from previous steps to one reducer task.</p>
+                <p>To overcome that issue, query had to be tweaked and refactored in the way that there are multiple reducers at the end. That task required bigger expertise knowledge and more time we could
+                spend on that test, so we aborted it. </p>
+
+                <p>
+                    <table class="table table-striped" style="width:100%">
+                        <caption>Tab.5 - No.3 results.</caption>
+                        <tr> 
+                            <th>Configuration</th> 
+                            <th>Time (sec)</th> 
+                        </tr>
+                        <tr><td>Hadoop/Hive</td> <td>739</td></tr>
+                        <tr><td>Hadoop/Hive + 10 slaves</td> <td>446</td></tr>
+                        <tr><td>Hadoop/Hive + 20 slaves</td> <td>385</td></tr>
+                        <tr><td>Redshift</td> <td>32</td></tr>
+                    </table>
+                </p>
+
+                <p>Again, Redshift outperformed Hive in query execution time. What is more, one cannot do direct
+                 updates on Hive’s External Tables. Data from External Tables sits outside Hive system. Hive stores
+                in its meta-store only schema and location of data. The fact, that updates cannot be used
+                directly, created some additional complexities. Instead of update, new table is created using
+                syntax: 
+                <pre>
+                    <code>
+-- pseudo-code
+CREATE TABLE updated_a AS
+SELECT * 
+  FROM a
+  INNER JOIN on b
+ WHERE a.id not in b.id
+UNION ALL
+SELECT *
+  FROM b
+                    </code>
+                </pre>
+                </p>
+
+                <h2 class="section-heading">Conclusions</h2>
+                <p>Based on results and experience we obtained during tests, Amazon Redshift was chosen as place where transformations will take place. Redshift showed indisputably superior execution speed on 
+                data with our volume. Also it was simpler to work with. </p>
+                <p>Despite already mentioned issues with updates, some other inconveniences were encountered during development with Hive. Firstly, writing queries was slow, due to fact that even simple queries took 
+                seconds to run. This is because there is a lot of boilerplate in translating Hive-SQL query into 
+                map reduce job, executing mappers, reducer and finally obtaining results. </p>
+                <p>Secondly, some relational database operations are not suitable for Hadoop/Hive. Example of that,
+                 was non-equivalent join present in query No.2. Closest past timestamp between rows in two tables 
+                 had to be matched there. Using “<” sign in join would make that query fairly simple. Although, 
+                 because Hive do not support other signs than “=” in joins, 
+                 “finding timestamp” logic had to be moved into where/having clauses. Even though it was possible 
+                 to do, it was not as straightforward as it should be.</p>
+                 <p>
+                 To summarize, main reasons to choose Redshift were:
+                 <ul>
+                     <li>Execution time was much faster in Redshift.</li>
+                     <li>Type of transformations and tasks performed during ETL is better suited for Redshift.</li>
+                     <li>It is more efficient to develop queries in more standard SQL, rather than in HiveSQL.</li>
+                     <li>With < TB data volumes there is no need of using heavy Hadoop machinery.</li>
+                 </ul>
+                 </p>
+                 <p>Finally, it is valid to point here, that conducted tests were purely for purpose of choosing 
+                 Hive or Redshift as ETL tool. It was not “to be, or not to be” question for Hadoop in our 
+                 ecosystem. There are still valid use cases for it in our environment, like crunching huge amount 
+                 of unstructured, non-relational datasets and preparing them for DWH ingestion in more suitable 
+                 role.</p>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+{% endblock body_block %}
